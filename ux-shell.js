@@ -74,7 +74,7 @@
     header.className = "header px-header";
     header.innerHTML = `
       <div class="px-header-copy">
-        <h1>${greeting ? '<span id="px-greeting">Bonjour</span> <span id="px-greeting-name"></span> <span aria-hidden="true">👋</span>' : title}</h1>
+        <h1${greeting ? ' id="nom"' : ''}>${greeting ? '<span id="px-greeting">Bonjour</span> <span id="px-greeting-name"></span> <span aria-hidden="true">👋</span>' : title}</h1>
         <p>${greeting ? '<span id="px-current-date"></span>' : subtitle}</p>
       </div>
       <button type="button" class="px-notification-trigger" aria-label="Notifications">
@@ -131,6 +131,7 @@
     shell.className = "px-screen px-home-screen";
     shell.innerHTML = `
       <section class="px-score-card px-card">
+        <strong id="hero-score" hidden></strong>
         <div class="px-score-copy">
           <span>Bien-être</span>
           <div class="px-score-number"><strong id="px-health-score">--</strong><em>/ 100</em></div>
