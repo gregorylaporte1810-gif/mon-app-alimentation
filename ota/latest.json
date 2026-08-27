@@ -1,6 +1,8 @@
 {
-  "version": "9b32d2a8e5f1",
+  "version": "4.1.0-bootstrap-bde5bf808f45",
+  "appVersion": "4.1.0",
+  "schemaVersion": 4,
   "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/wellness-web.zip",
-  "message": "Mise à jour automatique Wellness",
-  "publishedAt": "2026-08-27T04:02:53Z"
+  "message": "Wellness 4.1 - fiabilisation",
+  "publishedAt": "2026-08-27T04:54:03Z"
 }
