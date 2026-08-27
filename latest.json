@@ -1,9 +1,9 @@
 {
-  "version": "5.3.0-ea0b8304a26c",
-  "appVersion": "5.3.0",
+  "version": "5.3.5-641c0c89f535",
+  "appVersion": "5.3.5",
   "schemaVersion": 4,
-  "sourceCommit": "ea0b8304a26c77a7930966fc8d44c473ee47f6ad",
+  "sourceCommit": "641c0c89f535cb09d025ff0721f86af4cd91ecd5",
   "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",
   "message": "Mise à jour automatique Wellness",
-  "publishedAt": "2026-08-27T20:52:10Z"
+  "publishedAt": "2026-08-27T21:02:37Z"
 }
