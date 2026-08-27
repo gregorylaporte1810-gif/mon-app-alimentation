@@ -68,7 +68,7 @@ jobs:
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="4.2.0-${GITHUB_SHA::12}"
+          VERSION="4.2.1-${GITHUB_SHA::12}"
           rm -rf /tmp/wellness-ota
           mkdir -p /tmp/wellness-ota
           (
@@ -79,7 +79,7 @@ jobs:
           cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
-            "appVersion": "4.2.0",
+            "appVersion": "4.2.1",
             "schemaVersion": 4,
             "sourceCommit": "${GITHUB_SHA}",
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",

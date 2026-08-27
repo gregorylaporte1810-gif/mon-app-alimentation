@@ -135,6 +135,25 @@
     return `${shown} ${label}`;
   }
 
+  function journalMealPresence(journal = []) {
+    const result = {
+      "Petit-déjeuner": false,
+      "Déjeuner": false,
+      "Dîner": false,
+    };
+
+    if (!Array.isArray(journal)) return result;
+
+    journal.forEach((entry) => {
+      const slot = String(entry?.repasSlot || "").trim();
+      if (Object.prototype.hasOwnProperty.call(result, slot)) {
+        result[slot] = true;
+      }
+    });
+
+    return result;
+  }
+
   function stripQuantitySuffix(name = "") {
     return String(name)
       .replace(/(?:\s*\([0-9]+(?:[.,][0-9]+)?\s*(?:g|kg|ml|cl|l|L|unite|unites|unité|unités)\))+\s*$/iu, "")
@@ -152,6 +171,7 @@
     toReferenceAmount,
     scaleFood,
     formatQuantity,
+    journalMealPresence,
     stripQuantitySuffix,
   };
 })();

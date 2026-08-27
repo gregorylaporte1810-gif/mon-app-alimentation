@@ -4668,3 +4668,52 @@ body.w2-native-scan-active > *:not(#w2-native-scanner-ui) {
   }
 }
 
+
+
+/* ======================================================
+   WELLNESS V4.2 FOOD DATABASE
+====================================================== */
+.v42-fooddb-info {
+  margin: 8px 2px 0 !important;
+  color: #7f91ab !important;
+  font-size: .72rem;
+  line-height: 1.4;
+}
+.v42-food-card .v42-food-source {
+  margin-top: 8px;
+  color: #6f84a4;
+  font-size: .62rem;
+  font-style: normal;
+  font-weight: 750;
+}
+.v42-unit-select {
+  min-width: 92px;
+  margin: 0 !important;
+  padding: 12px 34px 12px 12px !important;
+  border-radius: 14px !important;
+}
+.v42-piece-weight-row {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+.v42-piece-weight-row[hidden] { display: none !important; }
+.v42-manual-quantity-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 130px;
+  gap: 10px;
+  margin: 12px 0;
+}
+#mega-journal-edit-quantity-wrap {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 105px;
+  gap: 8px;
+  align-items: end;
+}
+#mega-journal-edit-quantity-wrap > span {
+  grid-column: 1 / -1;
+}
+@media (max-width: 520px) {
+  .v42-manual-quantity-grid { grid-template-columns: minmax(0,1fr) 112px; }
+  #mega-journal-edit-quantity-wrap { grid-template-columns: minmax(0,1fr) 96px; }
+}

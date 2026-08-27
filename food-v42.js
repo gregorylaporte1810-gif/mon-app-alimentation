@@ -610,3 +610,121 @@
   // Le premier rendu bénéficie immédiatement de la base Ciqual.
   try { w2RenderFoodHub(); } catch {}
 })();
+
+
+/* ======================================================
+   WELLNESS V4.2.1 JOURNAL TODAY MEAL SYNC
+====================================================== */
+(() => {
+  "use strict";
+
+  const U = window.WellnessFoodUnits;
+  const MEALS = ["Petit-déjeuner", "Déjeuner", "Dîner"];
+
+  function ensureAutoState(account) {
+    if (!account.repas || typeof account.repas !== "object") {
+      account.repas = {
+        "Petit-déjeuner": false,
+        "Déjeuner": false,
+        "Dîner": false,
+      };
+    }
+
+    if (!account.repasAutoJournal || typeof account.repasAutoJournal !== "object") {
+      account.repasAutoJournal = {
+        "Petit-déjeuner": false,
+        "Déjeuner": false,
+        "Dîner": false,
+      };
+    }
+
+    MEALS.forEach((meal) => {
+      if (!(meal in account.repas)) account.repas[meal] = false;
+      if (!(meal in account.repasAutoJournal)) account.repasAutoJournal[meal] = false;
+    });
+
+    return account.repasAutoJournal;
+  }
+
+  function syncMealsFromJournal({ refresh = false } = {}) {
+    if (typeof obtenirCompteActif !== "function") return false;
+
+    const account = obtenirCompteActif();
+    if (!account) return false;
+
+    const auto = ensureAutoState(account);
+    const presence = U?.journalMealPresence
+      ? U.journalMealPresence(account.journalCalories || [])
+      : {
+          "Petit-déjeuner": (account.journalCalories || []).some((entry) => entry.repasSlot === "Petit-déjeuner"),
+          "Déjeuner": (account.journalCalories || []).some((entry) => entry.repasSlot === "Déjeuner"),
+          "Dîner": (account.journalCalories || []).some((entry) => entry.repasSlot === "Dîner"),
+        };
+
+    let changed = false;
+
+    MEALS.forEach((meal) => {
+      if (presence[meal]) {
+        if (account.repas[meal] !== true) {
+          account.repas[meal] = true;
+          changed = true;
+        }
+        if (auto[meal] !== true) {
+          auto[meal] = true;
+          changed = true;
+        }
+        return;
+      }
+
+      if (auto[meal] === true) {
+        if (account.repas[meal] !== false) {
+          account.repas[meal] = false;
+          changed = true;
+        }
+        auto[meal] = false;
+        changed = true;
+      }
+    });
+
+    if (changed && typeof sauvegarderEtatApplication === "function") {
+      sauvegarderEtatApplication();
+    }
+
+    if (changed && refresh && typeof rafraichirApplication === "function") {
+      queueMicrotask(() => rafraichirApplication());
+    }
+
+    return changed;
+  }
+
+  function wrapMutation(name, refreshAfter) {
+    const original = window[name];
+    if (typeof original !== "function" || original.__wellnessMealSyncWrapped) return;
+
+    const wrapped = function wellnessMealSyncMutation(...args) {
+      const result = original.apply(this, args);
+      if (result && typeof result.then === "function") {
+        return result.then((value) => {
+          if (value !== false) syncMealsFromJournal({ refresh: refreshAfter });
+          return value;
+        });
+      }
+      if (result !== false) syncMealsFromJournal({ refresh: refreshAfter });
+      return result;
+    };
+
+    wrapped.__wellnessMealSyncWrapped = true;
+    wrapped.__wellnessMealSyncOriginal = original;
+    window[name] = wrapped;
+  }
+
+  wrapMutation("ajouterCaloriesAuJournal", false);
+  wrapMutation("modifierEntreeJournal", true);
+  wrapMutation("supprimerEntreeJournal", true);
+
+  syncMealsFromJournal({ refresh: true });
+
+  window.WellnessMealJournalSync = {
+    sync: syncMealsFromJournal,
+  };
+})();

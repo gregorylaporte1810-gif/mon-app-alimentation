@@ -59,5 +59,27 @@ test("retire une ancienne quantité en litres", () => {
   if (U.stripQuantitySuffix("Eau (1 L)") !== "Eau") throw new Error("suffixe non retiré");
 });
 
+
+test("journal valide petit-déjeuner", () => {
+  const p = U.journalMealPresence([{ repasSlot: "Petit-déjeuner" }]);
+  if (!p["Petit-déjeuner"] || p["Déjeuner"] || p["Dîner"]) throw new Error("présence repas incorrecte");
+});
+test("journal valide plusieurs repas", () => {
+  const p = U.journalMealPresence([
+    { repasSlot: "Petit-déjeuner" },
+    { repasSlot: "Déjeuner" },
+    { repasSlot: "Collation" },
+  ]);
+  if (!p["Petit-déjeuner"] || !p["Déjeuner"] || p["Dîner"]) throw new Error("présence multiple incorrecte");
+});
+test("collation ne valide pas un des 3 repas", () => {
+  const p = U.journalMealPresence([{ repasSlot: "Collation" }]);
+  if (Object.values(p).some(Boolean)) throw new Error("la collation ne doit pas compter dans 0/3 repas");
+});
+test("journal vide ne valide aucun repas", () => {
+  const p = U.journalMealPresence([]);
+  if (Object.values(p).some(Boolean)) throw new Error("journal vide incorrect");
+});
+
 console.log(`\n${ok} / ${total} tests Food Database réussis`);
 if (ok !== total) process.exit(1);
