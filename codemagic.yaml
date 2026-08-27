@@ -21,8 +21,12 @@ workflows:
         script: |
           rm -rf ios
           node node_modules/@capacitor/cli/bin/capacitor add ios --packagemanager CocoaPods
-          node scripts/configure-ios-native.mjs
           node node_modules/@capacitor/cli/bin/capacitor sync ios
+          node scripts/configure-ios-native.mjs
+          cd ios/App
+          pod install --repo-update
+          cd ../..
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" ios/App/App/Info.plist
 
       - name: Build unsigned iOS Simulator app
         script: |
@@ -61,8 +65,12 @@ workflows:
         script: |
           rm -rf ios
           node node_modules/@capacitor/cli/bin/capacitor add ios --packagemanager CocoaPods
-          node scripts/configure-ios-native.mjs
           node node_modules/@capacitor/cli/bin/capacitor sync ios
+          node scripts/configure-ios-native.mjs
+          cd ios/App
+          pod install --repo-update
+          cd ../..
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" ios/App/App/Info.plist
 
       - name: Build unsigned iPhone app
         script: |
@@ -75,12 +83,14 @@ workflows:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
+            INFOPLIST_KEY_NSCameraUsageDescription="Wellness utilise la caméra pour scanner les codes-barres alimentaires." \
             build
 
       - name: Package unsigned IPA
         script: |
           APP_PATH="build/ios-device/Build/Products/Release-iphoneos/App.app"
           test -d "$APP_PATH"
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$APP_PATH/Info.plist"
           rm -rf build/unsigned-ipa
           mkdir -p build/unsigned-ipa/Payload
           cp -R "$APP_PATH" build/unsigned-ipa/Payload/App.app

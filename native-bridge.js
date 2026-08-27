@@ -248,46 +248,177 @@
     await scheduleNativeReminders({ requestPermission: true });
   }
 
+  let nativeScannerRunning = false;
+  let nativeScannerHandles = [];
+  let nativeScannerOverlay = null;
+
+  function ensureNativeScannerOverlay() {
+    if (nativeScannerOverlay?.isConnected) return nativeScannerOverlay;
+
+    const overlay = document.createElement("div");
+    overlay.id = "w2-native-scanner-ui";
+    overlay.innerHTML = `
+      <div class="w2-native-scanner-top">
+        <button type="button" id="w2-native-scanner-cancel" aria-label="Fermer le scanner">✕</button>
+        <div>
+          <strong>Scanner le code-barres</strong>
+          <span>Place le code dans le cadre</span>
+        </div>
+      </div>
+      <div class="w2-native-scanner-frame" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </div>
+      <div class="w2-native-scanner-bottom">
+        <p id="w2-native-scanner-status">Recherche automatique…</p>
+        <button type="button" id="w2-native-scanner-manual">Saisir le code manuellement</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector("#w2-native-scanner-cancel")?.addEventListener("click", () => {
+      stopNativeBarcodeScan({ reopenModal: true });
+    });
+
+    overlay.querySelector("#w2-native-scanner-manual")?.addEventListener("click", () => {
+      stopNativeBarcodeScan({ reopenModal: true });
+      setTimeout(() => document.getElementById("w2-barcode-input")?.focus(), 250);
+    });
+
+    nativeScannerOverlay = overlay;
+    return overlay;
+  }
+
+  function updateNativeScannerStatus(text) {
+    const el = document.getElementById("w2-native-scanner-status");
+    if (el) el.textContent = text;
+  }
+
+  async function removeNativeScannerListeners() {
+    const handles = nativeScannerHandles.splice(0);
+    for (const handle of handles) {
+      try {
+        await handle?.remove?.();
+      } catch {}
+    }
+  }
+
+  async function stopNativeBarcodeScan({ reopenModal = false } = {}) {
+    const BarcodeScanner = plugin("BarcodeScanner");
+
+    if (BarcodeScanner && nativeScannerRunning) {
+      try {
+        await BarcodeScanner.stopScan();
+      } catch (error) {
+        console.warn("[Wellness Native] stopScan :", error);
+      }
+    }
+
+    await removeNativeScannerListeners();
+    nativeScannerRunning = false;
+    document.documentElement.classList.remove("w2-native-scan-active");
+    document.body.classList.remove("w2-native-scan-active");
+    nativeScannerOverlay?.classList.remove("active");
+
+    if (reopenModal) {
+      const overlay = document.getElementById("w2-barcode-overlay");
+      if (overlay) {
+        overlay.classList.add("ouverte");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.classList.add("modal-ouverte");
+      }
+    }
+  }
+
   async function nativeBarcodeScan() {
     const BarcodeScanner = plugin("BarcodeScanner");
     if (!isNative() || !BarcodeScanner) return false;
+    if (nativeScannerRunning) return true;
 
     try {
-      const permission = await BarcodeScanner.requestPermissions?.();
-      if (permission && permission.camera && permission.camera !== "granted") {
-        setMessage("w2-barcode-help", "⚠️ Autorise la caméra pour scanner.");
+      // Avoid presenting the plugin's ready-made native scanner controller:
+      // on this iPhone it was terminating the app. startScan() keeps the
+      // camera session behind WKWebView and lets Wellness own the UI.
+      const support = await BarcodeScanner.isSupported?.();
+      if (support && support.supported === false) {
+        setMessage("w2-barcode-help", "⚠️ Le scanner n'est pas pris en charge sur cet appareil.");
         return true;
       }
 
-      setMessage("w2-barcode-help", "Place le code-barres dans le cadre du scanner iOS…");
+      const permission = await BarcodeScanner.checkPermissions?.();
+      let camera = permission?.camera;
 
-      const result = await BarcodeScanner.scan({
-        formats: [
-          "EAN_13",
-          "EAN_8",
-          "UPC_A",
-          "UPC_E",
-          "CODE_128",
-          "CODE_39",
-        ],
+      if (camera !== "granted") {
+        const requested = await BarcodeScanner.requestPermissions?.();
+        camera = requested?.camera;
+      }
+
+      if (camera !== "granted") {
+        setMessage("w2-barcode-help", "⚠️ Autorise la caméra dans Réglages > Wellness.");
+        return true;
+      }
+
+      // Close the current web modal before starting the camera layer.
+      const oldOverlay = document.getElementById("w2-barcode-overlay");
+      oldOverlay?.classList.remove("ouverte");
+      oldOverlay?.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-ouverte");
+
+      const scannerUi = ensureNativeScannerOverlay();
+      scannerUi.classList.add("active");
+      document.documentElement.classList.add("w2-native-scan-active");
+      document.body.classList.add("w2-native-scan-active");
+      nativeScannerRunning = true;
+
+      const scannedHandle = await BarcodeScanner.addListener(
+        "barcodesScanned",
+        async event => {
+          const barcode = event?.barcodes?.[0];
+          const value = barcode?.rawValue || barcode?.displayValue || "";
+          if (!value) return;
+
+          updateNativeScannerStatus(`Code détecté : ${value}`);
+          await stopNativeBarcodeScan();
+
+          const input = document.getElementById("w2-barcode-input");
+          if (input) input.value = value;
+
+          const webOverlay = document.getElementById("w2-barcode-overlay");
+          if (webOverlay) {
+            webOverlay.classList.add("ouverte");
+            webOverlay.setAttribute("aria-hidden", "false");
+            document.body.classList.add("modal-ouverte");
+          }
+
+          setMessage("w2-barcode-help", `Code détecté : ${value}. Recherche du produit…`);
+          await w2LookupBarcode(value);
+        }
+      );
+      nativeScannerHandles.push(scannedHandle);
+
+      const errorHandle = await BarcodeScanner.addListener(
+        "scanError",
+        async event => {
+          console.error("[Wellness Native] scanError :", event);
+          updateNativeScannerStatus("Scanner indisponible. Utilise la saisie manuelle.");
+          setMessage(
+            "w2-barcode-help",
+            `⚠️ ${event?.message || "Erreur du scanner."} Tu peux saisir le code manuellement.`
+          );
+          await stopNativeBarcodeScan({ reopenModal: true });
+        }
+      );
+      nativeScannerHandles.push(errorHandle);
+
+      await BarcodeScanner.startScan({
+        formats: ["EAN_13", "EAN_8", "UPC_A", "UPC_E", "CODE_128", "CODE_39"],
+        lensFacing: "BACK",
       });
 
-      const barcode = result?.barcodes?.[0];
-      const value = barcode?.rawValue || barcode?.displayValue || "";
-
-      if (!value) {
-        setMessage("w2-barcode-help", "Aucun code-barres détecté.");
-        return true;
-      }
-
-      const input = document.getElementById("w2-barcode-input");
-      if (input) input.value = value;
-
-      setMessage("w2-barcode-help", `Code détecté : ${value}. Recherche du produit…`);
-      await w2LookupBarcode(value);
+      updateNativeScannerStatus("Recherche automatique…");
       return true;
     } catch (error) {
       console.error("[Wellness Native] Scanner :", error);
+      await stopNativeBarcodeScan({ reopenModal: true });
       setMessage(
         "w2-barcode-help",
         `⚠️ ${error?.message || "Scanner indisponible."} Tu peux toujours saisir le code manuellement.`
