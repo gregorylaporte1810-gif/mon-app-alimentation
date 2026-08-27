@@ -748,9 +748,34 @@ if("serviceWorker" in navigator&&location.protocol!=="file:"){window.addEventLis
 // EXPORT CSV / PRINT-PDF
 // ======================================================
 
-function megaDownload(filename,text,type="text/plain"){const blob=new Blob([text],{type});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+async function megaDownload(filename,text,type="text/plain"){
+  return WellnessFiles.shareOrDownload(filename,text,type);
+}
 document.getElementById("mega-export-csv")?.addEventListener("click",()=>{const a=megaNormalizeAccount();const rows=[["type","date","valeur1","valeur2","valeur3","valeur4","valeur5"]];Object.entries(a.historique||{}).forEach(([date,h])=>rows.push(["jour",date,h.score||0,h.caloriesConsommees||0,h.eau||0,h.pas||0,h.repas||0]));a.weightHistory.forEach((w)=>rows.push(["poids",w.date,w.weight,"","","",""]));a.measurementHistory.forEach((m)=>rows.push(["mensurations",m.date,m.waist||"",m.hips||"",m.chest||"",m.arm||"",m.thigh||""]));const csv=rows.map((r)=>r.map((x)=>`"${String(x).replaceAll('"','""')}"`).join(";")).join("\n");megaDownload(`wellness-${a.nomCompte||"profil"}.csv`,"\ufeff"+csv,"text/csv;charset=utf-8");});
-document.getElementById("mega-export-pdf")?.addEventListener("click",()=>{const a=megaNormalizeAccount();const t=megaJournalTotals(a);const weights=a.weightHistory.slice(-10).map((w)=>`<tr><td>${w.date}</td><td>${w.weight} kg</td></tr>`).join("");const win=window.open("","_blank");if(!win)return;win.document.write(`<!doctype html><html><head><title>Rapport Wellness</title><style>body{font-family:Arial;padding:36px;color:#172033}h1{margin-bottom:4px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{padding:15px;border:1px solid #ddd;border-radius:12px}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left}@media print{button{display:none}}</style></head><body><h1>Rapport Wellness — ${a.prenom||a.nomCompte}</h1><p>Généré le ${new Date().toLocaleDateString("fr-FR")}</p><div class="grid"><div class="card"><b>Calories aujourd'hui</b><br>${Math.round(t.calories)} / ${Math.round(a.objectifCalories||0)} kcal</div><div class="card"><b>Protéines</b><br>${Math.round(t.protein)} / ${a.macroTargets.protein||0} g</div><div class="card"><b>Pas</b><br>${a.pasEffectues.toLocaleString("fr-FR")}</div><div class="card"><b>Eau</b><br>${a.verresEau} verres</div></div><h2>Dernières pesées</h2><table><tr><th>Date</th><th>Poids</th></tr>${weights||'<tr><td colspan="2">Aucune donnée</td></tr>'}</table><p style="margin-top:30px;font-size:12px;color:#667">Les objectifs nutritionnels affichés par l'application sont des estimations indicatives.</p><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);win.document.close();});
+document.getElementById("mega-export-pdf")?.addEventListener("click",async()=>{
+  const a=megaNormalizeAccount();
+  const t=megaJournalTotals(a);
+  const lines=[
+    `Profil : ${a.prenom||a.nomCompte||"Wellness"}`,
+    `Date : ${new Date().toLocaleDateString("fr-FR")}`,
+    "",
+    `Calories aujourd'hui : ${Math.round(t.calories)} / ${Math.round(a.objectifCalories||0)} kcal`,
+    `Proteines : ${Math.round(t.protein)} / ${a.macroTargets.protein||0} g`,
+    `Pas : ${Number(a.pasEffectues||0).toLocaleString("fr-FR")}`,
+    `Eau : ${Number(a.verresEau||0)} verres`,
+    "",
+    "Dernieres pesees :",
+    ...(a.weightHistory||[]).slice(-10).map(w=>`${w.date}${w.time?` ${w.time}`:""} : ${w.weight} kg`),
+    "",
+    "Les objectifs nutritionnels affiches par Wellness sont des estimations indicatives."
+  ];
+  const pdf=WellnessFiles.buildTextPdf(lines,{title:"Rapport Wellness"});
+  await WellnessFiles.shareOrDownload(
+    `rapport-wellness-${megaToday()}.pdf`,
+    pdf,
+    "application/pdf"
+  );
+});
 
 // ======================================================
 // ACCOUNT / REFRESH WRAPPER

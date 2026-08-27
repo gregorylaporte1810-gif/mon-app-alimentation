@@ -530,9 +530,35 @@ document.getElementById("w2-cloud-pull")?.addEventListener("click",async()=>{try
 // BACKUP / RESTORE
 // ======================================================
 
-function w2Download(filename,text,type="application/json"){const blob=new Blob([text],{type});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),800);}
+async function w2Download(filename,text,type="application/json"){
+  const result=await WellnessFiles.shareOrDownload(filename,text,type);
+  const message=document.getElementById("w2-backup-message");
+  if(message){
+    if(result.ok) message.textContent=result.method==="share"?"✅ Sauvegarde prête à enregistrer ou partager.":"✅ Sauvegarde téléchargée.";
+    else if(!result.cancelled) message.textContent="⚠️ Impossible d’exporter le fichier sur cet appareil.";
+  }
+  return result;
+}
 document.getElementById("w2-backup-export")?.addEventListener("click",()=>{const payload={format:"wellness-backup",version:W2_VERSION,createdAt:new Date().toISOString(),app:etatApplication,theme:localStorage.getItem("wellnessTheme")||"dark"};w2Download(`wellness-backup-${w2Today()}.json`,JSON.stringify(payload,null,2));});
-document.getElementById("w2-backup-file")?.addEventListener("change",async event=>{const file=event.target.files?.[0],message=document.getElementById("w2-backup-message");if(!file)return;try{const data=JSON.parse(await file.text());if(data?.format!=="wellness-backup"||!data?.app?.comptes)throw new Error("Format de sauvegarde non reconnu.");if(!confirm("Restaurer cette sauvegarde ? Les données actuelles seront remplacées."))return;localStorage.setItem(CLE_APPLICATION,JSON.stringify(data.app));if(data.theme)localStorage.setItem("wellnessTheme",data.theme);message.textContent="✅ Sauvegarde restaurée. Rechargement…";setTimeout(()=>location.reload(),450);}catch(e){message.textContent=`⚠️ ${e.message}`;}finally{event.target.value="";}});
+document.getElementById("w2-backup-file")?.addEventListener("change",async event=>{
+  const file=event.target.files?.[0],message=document.getElementById("w2-backup-message");
+  if(!file)return;
+  try{
+    if(message)message.textContent="Lecture de la sauvegarde…";
+    const raw=await file.text();
+    const data=JSON.parse(raw);
+    if(data?.format!=="wellness-backup"||!data?.app?.comptes)throw new Error("Format de sauvegarde non reconnu.");
+    if(!confirm("Restaurer cette sauvegarde ? Les données actuelles seront remplacées."))return;
+    localStorage.setItem(CLE_APPLICATION,JSON.stringify(data.app));
+    if(data.theme)localStorage.setItem("wellnessTheme",data.theme);
+    if(message)message.textContent="✅ Sauvegarde restaurée. Rechargement…";
+    setTimeout(()=>location.reload(),450);
+  }catch(e){
+    if(message)message.textContent=`⚠️ ${e.message}`;
+  }finally{
+    event.target.value="";
+  }
+});
 
 // ======================================================
 // PLANNING / SHOPPING — préférences + fusion d'unités

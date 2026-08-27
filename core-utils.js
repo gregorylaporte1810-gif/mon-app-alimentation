@@ -172,3 +172,119 @@ window.WellnessCore = (() => {
     recommendationScore,
   };
 })();
+
+// ======================================================
+// MOBILE FILES — iOS/Capacitor friendly share + PDF
+// ======================================================
+window.WellnessFiles = (() => {
+  function toBlob(data, type = "application/octet-stream") {
+    if (data instanceof Blob) return data;
+    if (data instanceof Uint8Array || data instanceof ArrayBuffer) {
+      return new Blob([data], { type });
+    }
+    return new Blob([String(data)], { type });
+  }
+
+  async function shareOrDownload(filename, data, type = "application/octet-stream") {
+    const blob = toBlob(data, type);
+    const file = new File([blob], filename, { type, lastModified: Date.now() });
+
+    // iOS / Android / compatible WKWebView: use the native share sheet.
+    try {
+      if (typeof navigator.share === "function") {
+        const shareData = { files: [file] };
+        const canShareFiles =
+          typeof navigator.canShare !== "function" ||
+          navigator.canShare(shareData);
+
+        if (canShareFiles) {
+          // Keep this call directly in the click gesture chain.
+          await navigator.share(shareData);
+          return { ok: true, method: "share" };
+        }
+      }
+    } catch (error) {
+      // AbortError simply means the user closed the share sheet.
+      if (error?.name === "AbortError") {
+        return { ok: false, cancelled: true, method: "share" };
+      }
+      console.warn("Wellness share failed, using download fallback:", error);
+    }
+
+    // Desktop / normal browser fallback.
+    try {
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.rel = "noopener";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2500);
+      return { ok: true, method: "download" };
+    } catch (error) {
+      console.error("Wellness file export failed:", error);
+      return { ok: false, error, method: "none" };
+    }
+  }
+
+  function ascii(value) {
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\x20-\x7E]/g, "?")
+      .replace(/\\/g, "\\\\")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)");
+  }
+
+  function buildTextPdf(lines = [], options = {}) {
+    const title = ascii(options.title || "Wellness");
+    const safeLines = [title, "", ...lines.map(ascii)];
+    const pageWidth = 595;
+    const pageHeight = 842;
+    const left = 52;
+    const top = 790;
+    const lineHeight = 18;
+
+    const commands = ["BT", "/F1 12 Tf", `${left} ${top} Td`];
+    safeLines.forEach((line, index) => {
+      if (index > 0) commands.push(`0 -${lineHeight} Td`);
+      commands.push(`(${line}) Tj`);
+    });
+    commands.push("ET");
+    const stream = commands.join("\n");
+
+    const objects = [];
+    objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+    objects[2] = "<< /Type /Pages /Kids [3 0 R] /Count 1 >>";
+    objects[3] =
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] ` +
+      "/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>";
+    objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+    objects[5] = `<< /Length ${new TextEncoder().encode(stream).length} >>\nstream\n${stream}\nendstream`;
+
+    let pdf = "%PDF-1.4\n";
+    const offsets = [0];
+
+    for (let i = 1; i <= 5; i += 1) {
+      offsets[i] = new TextEncoder().encode(pdf).length;
+      pdf += `${i} 0 obj\n${objects[i]}\nendobj\n`;
+    }
+
+    const xrefOffset = new TextEncoder().encode(pdf).length;
+    pdf += "xref\n0 6\n";
+    pdf += "0000000000 65535 f \n";
+    for (let i = 1; i <= 5; i += 1) {
+      pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+    }
+    pdf += "trailer\n<< /Size 6 /Root 1 0 R >>\n";
+    pdf += `startxref\n${xrefOffset}\n%%EOF`;
+
+    return new TextEncoder().encode(pdf);
+  }
+
+  return { shareOrDownload, buildTextPdf };
+})();
+
