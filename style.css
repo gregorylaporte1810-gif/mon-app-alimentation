@@ -5641,3 +5641,263 @@ html.v51-offline .v42-food-source {
     min-height: 40px;
   }
 }
+
+
+
+/* ======================================================
+   WELLNESS V5.2 — FINAL AUDIT POLISH
+====================================================== */
+
+/* ------------------------------------------------------
+   FAB: smaller, higher, less intrusive
+------------------------------------------------------ */
+.v52-fab,
+.fab,
+.px-fab,
+[data-fab],
+.bouton-flottant,
+.action-flottante {
+  width: 58px !important;
+  height: 58px !important;
+  min-width: 58px !important;
+  min-height: 58px !important;
+  right: 22px !important;
+  bottom: calc(98px + env(safe-area-inset-bottom)) !important;
+  font-size: 2rem !important;
+  box-shadow: 0 14px 34px rgba(76,29,149,.28) !important;
+}
+.page,
+.px-screen {
+  scroll-padding-bottom: calc(170px + env(safe-area-inset-bottom));
+}
+
+/* ------------------------------------------------------
+   Today
+------------------------------------------------------ */
+.v52-score-empty {
+  opacity: .78;
+  transform: scale(.92);
+}
+.v52-score-empty .px-score-heart {
+  opacity: .72;
+}
+.v52-home-shortcuts {
+  gap: 8px !important;
+}
+.v52-home-shortcuts .px-mini-card {
+  min-width: 0;
+  padding: 12px 9px !important;
+}
+.v52-home-shortcuts .px-mini-card strong {
+  font-size: .76rem !important;
+}
+.v52-home-shortcuts .px-mini-card small {
+  overflow: hidden;
+  font-size: .58rem !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------
+   Nutrition compact empty meals
+------------------------------------------------------ */
+#px-journal-list .px-journal-group.v52-empty-meal {
+  min-height: 0 !important;
+}
+#px-journal-list .px-journal-group.v52-empty-meal .px-journal-group-head {
+  min-height: 74px !important;
+  padding-block: 11px !important;
+}
+#px-journal-list .px-journal-group.v52-empty-meal .px-journal-empty {
+  min-height: 0 !important;
+  padding: 8px 18px 11px !important;
+  border-top: 1px solid rgba(148,163,184,.06);
+  font-size: .67rem !important;
+}
+#px-journal-list .px-journal-group.v52-empty-meal [data-v43-slot-repeat],
+#px-journal-list .px-journal-group.v52-empty-meal [data-v43-template-save],
+#px-journal-list .px-journal-group.v52-empty-meal .v43-meal-actions {
+  margin-top: 0 !important;
+}
+.v52-unavailable-action {
+  opacity: .34 !important;
+  filter: saturate(.5);
+}
+.v52-two-lines {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.28 !important;
+}
+
+/* ------------------------------------------------------
+   Progress calendar
+------------------------------------------------------ */
+.v52-calendar .v44-section-head {
+  align-items: flex-start;
+}
+.v52-calendar-nav {
+  display: grid !important;
+  grid-template-columns: 34px minmax(104px,auto) 34px !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.v52-calendar-nav button:first-child {
+  order: 1;
+}
+.v52-calendar-nav span {
+  order: 2;
+  min-width: 0 !important;
+}
+.v52-calendar-nav button:last-child {
+  order: 3;
+}
+.v52-calendar-nav button {
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 !important;
+}
+.v52-calendar-nav span {
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* ------------------------------------------------------
+   Empty weight graph: compact until first data point
+------------------------------------------------------ */
+.v52-empty-weight-graph {
+  min-height: 0 !important;
+  padding-bottom: 18px !important;
+}
+.v52-empty-weight-graph svg,
+.v52-empty-weight-graph canvas,
+.v52-empty-weight-graph .px-weight-chart,
+.v52-empty-weight-graph [class*="chart-plot"] {
+  display: none !important;
+}
+.v52-empty-weight-graph .px-chart-axis,
+.v52-empty-weight-graph [class*="chart-axis"] {
+  display: none !important;
+}
+.v52-empty-weight-graph p,
+.v52-empty-weight-graph .message-vide {
+  margin: 12px 0 !important;
+}
+.v52-weight-cta {
+  width: auto !important;
+  margin: 8px 0 0 !important;
+  padding: 9px 12px !important;
+  border-radius: 11px !important;
+  background: rgba(34,197,94,.1) !important;
+  color: #7ee2ab !important;
+  border: 1px solid rgba(34,197,94,.14) !important;
+  font-size: .68rem !important;
+}
+
+/* ------------------------------------------------------
+   HealthKit truthful states
+------------------------------------------------------ */
+#v5-health-card[data-v52-health-state="blocked"] .v5-health-head em {
+  color: #fda4af !important;
+}
+#v5-health-card[data-v52-health-state="installed"] .v5-health-head em {
+  color: #9db1cc !important;
+}
+.v52-health-compact .v5-health-kpis {
+  grid-template-columns: repeat(3,1fr);
+  gap: 6px;
+}
+.v52-health-compact .v5-health-kpis > div {
+  min-height: 54px;
+}
+.v52-health-compact[data-v52-health-state="blocked"] .v5-health-kpis {
+  display: none !important;
+}
+.v52-health-compact[data-v52-health-state="blocked"] .v5-health-actions {
+  margin-top: 8px;
+}
+#v5-health-card button:disabled {
+  opacity: .38 !important;
+  pointer-events: none;
+}
+#v5-health-card input[type="checkbox"]:not(:checked) {
+  opacity: .72;
+  accent-color: #334155;
+}
+
+/* ------------------------------------------------------
+   Offline / online badge below Dynamic Island
+------------------------------------------------------ */
+.v52-network-pill {
+  top: max(76px, calc(env(safe-area-inset-top) + 50px)) !important;
+  z-index: 400000 !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.35) !important;
+}
+html:not(.wellness-native-ios) .v52-network-pill {
+  top: max(12px, env(safe-area-inset-top)) !important;
+}
+
+/* ------------------------------------------------------
+   Subtle edge fade for scrolled content
+------------------------------------------------------ */
+#v52-top-fade {
+  position: fixed;
+  z-index: 9000;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: max(76px, calc(env(safe-area-inset-top) + 42px));
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(2,10,20,.96) 0%,
+    rgba(2,10,20,.72) 45%,
+    rgba(2,10,20,0) 100%
+  );
+  transition: opacity .18s ease;
+}
+#v52-top-fade.visible {
+  opacity: .62;
+}
+html:not(.wellness-native-ios) #v52-top-fade {
+  display: none;
+}
+
+/* Keep real overlays above the fade. */
+.modal-simple-overlay,
+.v51-network-pill,
+.navigation-principale {
+  z-index: 10000;
+}
+
+/* ------------------------------------------------------
+   Long-screen bottom safety
+------------------------------------------------------ */
+#page-recettes .px-screen,
+#page-suivi .px-screen,
+#page-profil .px-screen,
+#page-plan .px-screen {
+  padding-bottom: calc(155px + env(safe-area-inset-bottom)) !important;
+}
+
+@media (max-width: 430px) {
+  .v52-fab,
+  .fab,
+  .px-fab,
+  [data-fab],
+  .bouton-flottant,
+  .action-flottante {
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+    min-height: 54px !important;
+    right: 20px !important;
+    bottom: calc(100px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .v52-health-compact .v5-health-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+}

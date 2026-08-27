@@ -41,6 +41,8 @@ const files = [
   "health-v501-guard.js",
   "polish-v51-core.js",
   "polish-v51.js",
+  "final-v52-core.js",
+  "final-v52.js",
   "manifest.webmanifest",
   "sw.js",
 ];
