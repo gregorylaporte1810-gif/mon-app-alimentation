@@ -466,7 +466,23 @@ document.querySelectorAll("[data-w2-quick]").forEach(btn=>btn.addEventListener("
 }));
 
 document.addEventListener("pointerup",event=>{if(event.target.closest("button")||event.target.closest(".w2-file-button"))w2Haptic(8);},{passive:true});
-document.addEventListener("touchstart",event=>{if(!w2NormalizeAccount().w2.settings.gestures)return;if(event.touches.length!==1)return;const target=event.target;if(target.closest("input,textarea,select,.modal-simple,.modal-filtres"))return;w2SwipeStart={x:event.touches[0].clientX,y:event.touches[0].clientY,time:Date.now()};},{passive:true});
+document.addEventListener("touchstart",event=>{
+  w2SwipeStart=null;
+  if(!w2NormalizeAccount().w2.settings.gestures)return;
+  if(event.touches.length!==1)return;
+
+  const target=event.target;
+
+  // Ne jamais déclencher le changement de page depuis une zone qui se
+  // fait défiler horizontalement, notamment le planning des repas.
+  if(target.closest("input,textarea,select,.modal-simple,.modal-filtres,.meal-plan-grid,[data-horizontal-scroll]"))return;
+
+  w2SwipeStart={
+    x:event.touches[0].clientX,
+    y:event.touches[0].clientY,
+    time:Date.now()
+  };
+},{passive:true});
 document.addEventListener("touchend",event=>{const a=w2NormalizeAccount();if(!a.w2.settings.gestures||!w2SwipeStart||!event.changedTouches[0])return;const dx=event.changedTouches[0].clientX-w2SwipeStart.x,dy=event.changedTouches[0].clientY-w2SwipeStart.y,dt=Date.now()-w2SwipeStart.time;w2SwipeStart=null;if(dt>600||Math.abs(dx)<90||Math.abs(dx)<Math.abs(dy)*1.35)return;const names=[...document.querySelectorAll(".navigation-principale [data-page]")].map(b=>b.dataset.page);const active=document.querySelector(".navigation-principale .nav-bouton.active")?.dataset.page;const i=names.indexOf(active);const next=dx<0?i+1:i-1;if(next>=0&&next<names.length)afficherPage(names[next]);},{passive:true});
 
 // ======================================================

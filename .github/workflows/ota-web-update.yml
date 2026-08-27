@@ -1,0 +1,87 @@
+name: Publish Wellness OTA
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "index.html"
+      - "style.css"
+      - "app.js"
+      - "features.js"
+      - "wellness2.js"
+      - "core-utils.js"
+      - "data-foods.js"
+      - "cloud.js"
+      - "ota-updater.js"
+      - "manifest.webmanifest"
+      - "sw.js"
+      - "icons/**"
+      - "scripts/build-web.mjs"
+      - "scripts/build-ota.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wellness-ota-main
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Build and publish web bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build web bundle
+        run: npm run build:web
+
+      - name: Create OTA package
+        shell: bash
+        run: |
+          VERSION="${GITHUB_SHA::12}"
+          rm -rf ota
+          mkdir -p ota
+          (
+            cd www
+            zip -qr ../ota/wellness-web.zip .
+          )
+
+          cat > ota/latest.json <<EOF
+          {
+            "version": "${VERSION}",
+            "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/wellness-web.zip",
+            "message": "Mise à jour automatique Wellness",
+            "publishedAt": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          }
+          EOF
+
+      - name: Commit OTA bundle
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -f ota/latest.json ota/wellness-web.zip
+
+          if git diff --cached --quiet; then
+            echo "Aucun changement OTA."
+            exit 0
+          fi
+
+          git commit -m "chore: publish OTA web bundle [skip ci]"
+          git push origin HEAD:main

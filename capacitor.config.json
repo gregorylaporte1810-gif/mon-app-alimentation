@@ -1,5 +1,13 @@
 {
   "appId": "com.gregorylaporte1810.wellness",
   "appName": "Wellness",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": false,
+      "appReadyTimeout": 20000,
+      "autoDeleteFailed": true,
+      "autoDeletePrevious": true
+    }
+  }
 }

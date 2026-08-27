@@ -7,10 +7,12 @@
     "build:web": "node scripts/build-web.mjs",
     "cap:add:ios": "npm run build:web && npx cap add ios",
     "cap:sync": "npm run build:web && npx cap sync ios",
-    "cap:doctor": "npx cap doctor"
+    "cap:doctor": "npx cap doctor",
+    "ota:build": "npm run build:web && node scripts/build-ota.mjs"
   },
   "dependencies": {
-    "@capacitor/core": "^8.5.0"
+    "@capacitor/core": "^8.5.0",
+    "@capgo/capacitor-updater": "^8.51.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
