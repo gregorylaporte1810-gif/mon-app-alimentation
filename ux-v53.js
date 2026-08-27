@@ -8,7 +8,7 @@
     return;
   }
 
-  const VERSION = "5.3.1";
+  const VERSION = "5.3.5";
   let observerTimer = 0;
 
   // =====================================================
@@ -37,7 +37,7 @@
           <button type="button" class="fermer-modal-simple" id="v53-steps-close" aria-label="Fermer">✕</button>
         </div>
         <div class="modal-simple-contenu">
-          <p class="v53-steps-help">Saisis le <strong>total réel</strong> de pas pour aujourd'hui. Tu peux aussi diminuer la valeur si tu t'es trompé.</p>
+          <p class="v53-steps-help">Le total actuel est affiché ci-dessous. Utilise les raccourcis ou touche le champ seulement si tu veux saisir une valeur précise.</p>
           <label for="v53-steps-total">Total de pas aujourd'hui</label>
           <input id="v53-steps-total" type="number" min="0" step="1" inputmode="numeric" placeholder="Ex : 7250">
           <div class="v53-step-shortcuts">
@@ -123,9 +123,16 @@
       overlay.setAttribute("aria-hidden", "false");
     }
 
+    // V5.3.5 : ne pas forcer le focus sur iPhone.
+    // Le clavier ne s'ouvre plus automatiquement et toute la fenêtre
+    // reste visible. L'utilisateur touche le champ uniquement s'il
+    // veut saisir le total au clavier.
     setTimeout(() => {
-      input?.focus();
-      input?.select?.();
+      input?.blur?.();
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur?.();
+      }
+      document.querySelector(".v53-steps-sheet")?.scrollTo?.({ top: 0, behavior: "instant" });
     }, 80);
   }
 

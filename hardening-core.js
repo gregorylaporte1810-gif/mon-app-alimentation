@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "5.3.4";
+  const APP_VERSION = "5.3.5";
   const SCHEMA_VERSION = 4;
   const BACKUP_FORMAT = "wellness-backup";
   const PHOTO_REF_PREFIX = "idb://wellness-progress/";
