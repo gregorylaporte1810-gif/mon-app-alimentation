@@ -5124,3 +5124,49 @@ body.w2-native-scan-active > *:not(#w2-native-scanner-ui) {
    WELLNESS V5 — APPLE HEALTH
 ====================================================== */
 .v5-health-card{padding:16px}.v5-health-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.v5-health-head>div{display:flex;align-items:center;gap:10px}.v5-health-logo{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#ff496f,#ff2d55);color:white;font-size:1.2rem}.v5-health-head small{display:block;color:#7385a1;font-size:.62rem;font-weight:850;letter-spacing:.08em}.v5-health-head strong{font-size:.9rem}.v5-health-head em{font-style:normal;font-size:.64rem;color:#78d5a6}.v5-health-card>p{margin:10px 0;color:#7d90ab;font-size:.7rem;line-height:1.45}.v5-health-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.v5-health-kpis>div{display:grid;gap:3px;padding:10px;border-radius:12px;background:rgba(13,22,38,.65)}.v5-health-kpis span{font-size:.61rem;color:#788aa5}.v5-health-kpis strong{font-size:.78rem}.v5-health-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.v5-health-actions button{width:auto!important;margin:0!important;padding:8px 10px!important;font-size:.68rem}.v5-health-auto{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(148,163,184,.08)}.v5-health-auto>span{display:grid;gap:2px}.v5-health-auto strong{font-size:.72rem}.v5-health-auto small{color:#6f829e;font-size:.61rem}.v5-health-auto input{width:22px;height:22px}.v5-health-status{margin-bottom:0!important}.v5-health-status[data-kind="success"]{color:#74d9a7!important}.v5-health-status[data-kind="error"]{color:#fca5a5!important}@media(max-width:500px){.v5-health-kpis{grid-template-columns:1fr 1fr}}
+
+
+
+/* ======================================================
+   WELLNESS V5.0.1 — HEALTHKIT SIGNING GUARD
+====================================================== */
+.v501-health-blocked-badge{
+  color:#fda4af!important;
+  background:rgba(244,63,94,.08);
+  border:1px solid rgba(244,63,94,.13);
+  border-radius:999px;
+  padding:5px 8px;
+}
+.v5-health-card button:disabled,
+.v5-health-card input:disabled{
+  opacity:.46!important;
+  cursor:not-allowed!important;
+}
+.v501-health-explain{
+  display:grid;
+  gap:4px;
+  margin-top:12px;
+  padding:11px 12px;
+  border:1px solid rgba(251,113,133,.14);
+  border-radius:13px;
+  background:rgba(127,29,29,.09);
+}
+.v501-health-explain strong{
+  color:#fda4af;
+  font-size:.72rem;
+}
+.v501-health-explain span{
+  color:#aab7ca;
+  font-size:.68rem;
+  line-height:1.42;
+}
+.v501-health-explain small,
+.v501-health-note{
+  color:#7f91aa;
+  font-size:.62rem;
+  line-height:1.4;
+}
+.v5-health-card code{
+  color:#c7d7ee;
+  font-size:.68rem;
+}

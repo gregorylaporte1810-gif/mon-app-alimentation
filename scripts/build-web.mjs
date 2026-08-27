@@ -38,6 +38,7 @@ const files = [
   "ux-shell.js",
   "native-bridge.js",
   "health-v5.js",
+  "health-v501-guard.js",
   "manifest.webmanifest",
   "sw.js",
 ];
