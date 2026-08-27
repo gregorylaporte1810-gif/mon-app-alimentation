@@ -55,7 +55,7 @@ test("validate app ok", () => assert.equal(H.validateAppState(validApp).ok,true)
 test("validate app missing active", () => assert.equal(H.validateAppState({compteActif:"x",comptes:{a:{}}}).ok,false));
 test("validate app bad journal", () => assert.equal(H.validateAppState({compteActif:"a",comptes:{a:{journalCalories:{}}}}).ok,false));
 test("backup schema", () => assert.equal(H.makeBackup(validApp).schemaVersion,4));
-test("backup version", () => assert.equal(H.makeBackup(validApp).appVersion,"4.1.0"));
+test("backup version", () => assert.equal(H.makeBackup(validApp).appVersion,H.APP_VERSION));
 test("backup validation", () => assert.equal(H.validateBackup(H.makeBackup(validApp)).ok,true));
 test("reject future backup", () => { const b=H.makeBackup(validApp); b.schemaVersion=99; assert.equal(H.validateBackup(b).ok,false); });
 
@@ -85,3 +85,4 @@ for (const [name, fn] of tests) {
 }
 console.log(`\n${passed} / ${tests.length} tests réussis`);
 if (passed !== tests.length) process.exitCode = 1;
+
