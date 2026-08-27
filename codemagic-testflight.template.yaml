@@ -1,0 +1,60 @@
+# TEMPLATE - à activer après connexion Apple Developer + App Store Connect
+# Remplace YOUR_CODEMAGIC_INTEGRATION par le nom de ton intégration
+# App Store Connect dans Codemagic.
+#
+# Bundle ID prévu :
+# com.gregorylaporte1810.wellness
+
+workflows:
+  ios-testflight:
+    name: Wellness - TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    integrations:
+      app_store_connect: YOUR_CODEMAGIC_INTEGRATION
+
+    environment:
+      node: 22
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.gregorylaporte1810.wellness
+      vars:
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+
+    scripts:
+      - name: Install npm dependencies
+        script: npm install
+
+      - name: Build web assets
+        script: npm run build:web
+
+      - name: Create Capacitor iOS project
+        script: |
+          rm -rf ios
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Apply Apple signing profiles
+        script: |
+          xcode-project use-profiles \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT"
+
+      - name: Build signed IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false

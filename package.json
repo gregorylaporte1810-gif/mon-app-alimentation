@@ -1,0 +1,22 @@
+{
+  "name": "wellness-2-pro",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Wellness 2.0 Pro - Capacitor iOS wrapper",
+  "scripts": {
+    "build:web": "node scripts/build-web.mjs",
+    "cap:add:ios": "npm run build:web && npx cap add ios",
+    "cap:sync": "npm run build:web && npx cap sync ios",
+    "cap:doctor": "npx cap doctor"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/ios": "^8.5.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

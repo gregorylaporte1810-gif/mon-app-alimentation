@@ -1,0 +1,39 @@
+workflows:
+  ios-simulator:
+    name: Wellness - iOS Simulator
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+
+    environment:
+      node: 22
+      xcode: latest
+
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+
+      - name: Build web assets
+        script: |
+          npm run build:web
+
+      - name: Create Capacitor iOS project
+        script: |
+          rm -rf ios
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Build unsigned iOS Simulator app
+        script: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build/ios-simulator \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+    artifacts:
+      - build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app
+      - /tmp/xcodebuild_logs/*.log
