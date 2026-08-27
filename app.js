@@ -621,6 +621,17 @@ function verifierNouveauJour() {
     "Déjeuner": false,
     "Dîner": false,
   };
+  // WELLNESS V4.3 ARCHIVE JOURNAL BEFORE DAILY RESET
+  if (Array.isArray(compte.journalCalories) && compte.journalCalories.length && compte.dateDonneesJour) {
+    compte.v43 = compte.v43 && typeof compte.v43 === "object" ? compte.v43 : {};
+    compte.v43.dailyJournals = compte.v43.dailyJournals && typeof compte.v43.dailyJournals === "object"
+      ? compte.v43.dailyJournals
+      : {};
+    compte.v43.dailyJournals[compte.dateDonneesJour] = JSON.parse(JSON.stringify(compte.journalCalories));
+    const joursArchives = Object.keys(compte.v43.dailyJournals).sort();
+    while (joursArchives.length > 90) delete compte.v43.dailyJournals[joursArchives.shift()];
+  }
+
   compte.caloriesConsommees = 0;
   compte.journalCalories = [];
   compte.dateDonneesJour = aujourdHui;

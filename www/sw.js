@@ -1,4 +1,4 @@
-const CACHE = "wellness-4.2.1";
+const CACHE = "wellness-4.3.0";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,8 @@ const ASSETS = [
   "./data-foods-ciqual.js",
   "./food-units-core.js",
   "./food-v42.js",
+  "./daily-ux-core-v43.js",
+  "./daily-ux-v43.js",
   "./cloud.js",
   "./app.js",
   "./features.js",
