@@ -20,8 +20,8 @@ workflows:
       - name: Create Capacitor iOS project
         script: |
           rm -rf ios
-          npx cap add ios
-          npx cap sync ios
+          node node_modules/@capacitor/cli/bin/capacitor add ios
+          node node_modules/@capacitor/cli/bin/capacitor sync ios
 
       - name: Build unsigned iOS Simulator app
         script: |
