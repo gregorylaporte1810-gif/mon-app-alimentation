@@ -745,10 +745,18 @@
         const deltaPct = (cur, old) => old ? Math.round((cur - old) / old * 100) : null;
         const s = deltaPct(period.stepsPct, prev.stepsPct);
         const k = deltaPct(period.calories, prev.calories);
-        const sleepMinutes = Math.round((period.sleep - prev.sleep) * 60);
+        const hasPreviousSleep = Number(prev.sleep) > 0;
+        const sleepMinutes = hasPreviousSleep ? Math.round((period.sleep - prev.sleep) * 60) : null;
         setText("px-week-steps-delta", s === null ? "Cette semaine" : `${s >= 0 ? "↑" : "↓"} ${Math.abs(s)} %`);
         setText("px-week-kcal-delta", k === null ? "kcal / jour" : `${k >= 0 ? "↑" : "↓"} ${Math.abs(k)} %`);
-        setText("px-week-sleep-delta", !Number.isFinite(sleepMinutes) ? "Cette semaine" : `${sleepMinutes >= 0 ? "↑" : "↓"} ${Math.abs(sleepMinutes)} min`);
+        setText(
+          "px-week-sleep-delta",
+          !period.sleep
+            ? "Cette semaine"
+            : !hasPreviousSleep
+              ? "Première mesure"
+              : `${sleepMinutes >= 0 ? "↑" : "↓"} ${Math.abs(sleepMinutes)} min`
+        );
       }
     }
 

@@ -152,6 +152,17 @@ document.getElementById("w2-save-preferences")?.addEventListener("click",()=>{
   sauvegarderEtatApplication(); rafraichirApplication(); w2Haptic();
 });
 
+// Apply dietary preferences consistently to the main recipe search/filter list.
+// The original app filters by meal type/time/kcal/protein/search; this adds the
+// user's diet, allergies, no-pork and disliked ingredients on top.
+const w2OriginalFilteredRecipes = obtenirRecettesFiltrees;
+obtenirRecettesFiltrees = function w2FilteredRecipes() {
+  const account = w2NormalizeAccount();
+  return w2OriginalFilteredRecipes().filter(recipe =>
+    W2_CORE.recipeAllowed(recipe, account.w2.preferences)
+  );
+};
+
 // ======================================================
 // ALIMENTS + PORTIONS
 // ======================================================

@@ -186,6 +186,13 @@ window.WellnessFiles = (() => {
   }
 
   async function shareOrDownload(filename, data, type = "application/octet-stream") {
+    // Real Capacitor app: persist a temporary native file then open the iOS/Android share sheet.
+    if (window.WellnessNative?.isNative?.()) {
+      const nativeResult = await window.WellnessNative.writeAndShare(filename, data, type);
+      if (nativeResult?.ok || nativeResult?.cancelled) return nativeResult;
+      // If the native bridge fails unexpectedly, keep the browser fallbacks below.
+    }
+
     const blob = toBlob(data, type);
     const file = new File([blob], filename, { type, lastModified: Date.now() });
 

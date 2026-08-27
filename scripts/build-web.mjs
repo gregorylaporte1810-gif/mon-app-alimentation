@@ -27,6 +27,7 @@ const files = [
   "cloud.js",
   "ota-updater.js",
   "ux-shell.js",
+  "native-bridge.js",
   "manifest.webmanifest",
   "sw.js",
 ];
