@@ -8,7 +8,7 @@
     return;
   }
 
-  const VERSION = "4.3.0";
+  const VERSION = "4.4.0";
   const MEALS = ["Petit-déjeuner", "Déjeuner", "Dîner", "Collation"];
   let activeQuickTab = "recent";
   let renderTimer = 0;

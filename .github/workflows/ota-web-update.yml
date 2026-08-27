@@ -19,6 +19,8 @@ on:
       - "food-v42.js"
       - "daily-ux-core-v43.js"
       - "daily-ux-v43.js"
+      - "smart-v44-core.js"
+      - "smart-v44.js"
       - "cloud.js"
       - "ota-updater.js"
       - "ux-shell.js"
@@ -33,6 +35,7 @@ on:
       - "scripts/test-core.mjs"
       - "scripts/test-food-v42.mjs"
       - "scripts/test-daily-v43.mjs"
+      - "scripts/test-smart-v44.mjs"
       - "scripts/import-ciqual-2025.mjs"
       - "scripts/normalize-v41.mjs"
       - ".github/workflows/ota-web-update.yml"
@@ -71,7 +74,7 @@ jobs:
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="4.3.1-${GITHUB_SHA::12}"
+          VERSION="4.4.0-${GITHUB_SHA::12}"
           rm -rf /tmp/wellness-ota
           mkdir -p /tmp/wellness-ota
           (
@@ -82,7 +85,7 @@ jobs:
           cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
-            "appVersion": "4.3.1",
+            "appVersion": "4.4.0",
             "schemaVersion": 4,
             "sourceCommit": "${GITHUB_SHA}",
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",

@@ -35,6 +35,9 @@
   }
 
   function searchLocal(query = "") {
+    if (window.WellnessSmartV44?.searchFoods) {
+      return window.WellnessSmartV44.searchFoods(query);
+    }
     return localFoods
       .map((food) => ({ food, score: scoreFood(food, query) }))
       .filter((row) => !query || row.score > 0)

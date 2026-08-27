@@ -31,6 +31,8 @@ const files = [
   "food-v42.js",
   "daily-ux-core-v43.js",
   "daily-ux-v43.js",
+  "smart-v44-core.js",
+  "smart-v44.js",
   "cloud.js",
   "ota-updater.js",
   "ux-shell.js",
