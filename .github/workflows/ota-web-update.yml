@@ -11,15 +11,23 @@ on:
       - "features.js"
       - "wellness2.js"
       - "core-utils.js"
+      - "hardening-core.js"
+      - "hardening.js"
       - "data-foods.js"
       - "cloud.js"
       - "ota-updater.js"
       - "ux-shell.js"
+      - "native-bridge.js"
       - "manifest.webmanifest"
       - "sw.js"
       - "icons/**"
+      - "package.json"
+      - "package-lock.json"
       - "scripts/build-web.mjs"
       - "scripts/build-ota.mjs"
+      - "scripts/test-core.mjs"
+      - "scripts/normalize-v41.mjs"
+      - ".github/workflows/ota-web-update.yml"
   workflow_dispatch:
 
 permissions:
@@ -31,7 +39,7 @@ concurrency:
 
 jobs:
   publish:
-    name: Build and publish web bundle
+    name: Verify, build and publish bootstrap OTA
     runs-on: ubuntu-latest
 
     steps:
@@ -43,18 +51,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "22.11.0"
+          cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install exact dependencies
+        run: npm ci
 
-      - name: Build web bundle
-        run: npm run build:web
+      - name: Verify source
+        run: npm run verify
 
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="${GITHUB_SHA::12}"
+          VERSION="4.1.0-bootstrap-${GITHUB_SHA::12}"
           rm -rf ota
           mkdir -p ota
           (
@@ -65,18 +74,21 @@ jobs:
           cat > ota/latest.json <<EOF
           {
             "version": "${VERSION}",
+            "appVersion": "4.1.0",
+            "schemaVersion": 4,
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/wellness-web.zip",
-            "message": "Mise à jour automatique Wellness",
+            "message": "Wellness 4.1 - fiabilisation",
             "publishedAt": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           }
           EOF
 
-      - name: Commit OTA bundle
+      # One final main-branch publication is intentional. It upgrades older
+      # installed apps to the updater that knows the dedicated `ota` branch.
+      - name: Commit bootstrap OTA bundle
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add -f ota/latest.json ota/wellness-web.zip
 
           if git diff --cached --quiet; then
@@ -84,5 +96,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "chore: publish OTA web bundle [skip ci]"
+          git commit -m "chore: publish Wellness 4.1 bootstrap OTA [skip ci]"
           git push origin HEAD:main

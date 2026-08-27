@@ -6,12 +6,17 @@ workflows:
 
     environment:
       node: v22.11.0
-      xcode: latest
+      xcode: 26.4
 
     scripts:
       - name: Install npm dependencies
         script: |
-          npm install
+          npm ci
+
+      - name: Verify web code
+        script: |
+          npm run check:syntax
+          npm test
 
       - name: Build web assets
         script: |
@@ -50,12 +55,17 @@ workflows:
 
     environment:
       node: v22.11.0
-      xcode: latest
+      xcode: 26.4
 
     scripts:
       - name: Install npm dependencies
         script: |
-          npm install
+          npm ci
+
+      - name: Verify web code
+        script: |
+          npm run check:syntax
+          npm test
 
       - name: Build web assets
         script: |

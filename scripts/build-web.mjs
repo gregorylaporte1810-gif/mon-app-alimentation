@@ -23,6 +23,8 @@ const files = [
   "features.js",
   "wellness2.js",
   "core-utils.js",
+  "hardening-core.js",
+  "hardening.js",
   "data-foods.js",
   "cloud.js",
   "ota-updater.js",

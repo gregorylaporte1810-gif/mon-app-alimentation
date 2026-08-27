@@ -1,8 +1,13 @@
 (() => {
   "use strict";
 
-  const MANIFEST_URL =
-    "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/latest.json";
+  // The dedicated OTA branch is the primary channel from V4.1 onward.
+  // The main-branch manifest remains as a permanent bootstrap fallback for
+  // older installed builds whose updater still only knows the old location.
+  const MANIFEST_URLS = [
+    "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/latest.json",
+    "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/latest.json",
+  ];
 
   const PENDING_VERSION_KEY = "wellnessOtaPendingVersion";
   const ACTIVE_VERSION_KEY = "wellnessOtaActiveVersion";
@@ -61,8 +66,6 @@
   }
 
   async function markAppReady() {
-    // This call must happen before checking the network so a valid OTA bundle
-    // is not rolled back by the native updater.
     const result = await updater.notifyAppReady();
     const currentVersion = result?.bundle?.version;
 
@@ -75,29 +78,34 @@
     }
   }
 
-  async function fetchManifest() {
-    const separator = MANIFEST_URL.includes("?") ? "&" : "?";
-    const response = await fetch(
-      `${MANIFEST_URL}${separator}t=${Date.now()}`,
-      {
-        cache: "no-store",
-        headers: {
-          Accept: "application/json"
-        }
-      }
-    );
+  async function fetchManifestFrom(url) {
+    const separator = url.includes("?") ? "&" : "?";
+    const response = await fetch(`${url}${separator}t=${Date.now()}`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
 
     if (!response.ok) {
       throw new Error(`Manifest OTA indisponible (${response.status})`);
     }
 
     const manifest = await response.json();
-
     if (!manifest?.version || !manifest?.url) {
       throw new Error("Manifest OTA invalide");
     }
-
     return manifest;
+  }
+
+  async function fetchManifest() {
+    let lastError = null;
+    for (const url of MANIFEST_URLS) {
+      try {
+        return await fetchManifestFrom(url);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error("Aucun canal OTA disponible");
   }
 
   async function getCurrentVersion() {
@@ -123,10 +131,7 @@
       const currentVersion = await getCurrentVersion();
       const pendingVersion = localStorage.getItem(PENDING_VERSION_KEY);
 
-      if (
-        manifest.version === currentVersion ||
-        manifest.version === pendingVersion
-      ) {
+      if (manifest.version === currentVersion || manifest.version === pendingVersion) {
         return;
       }
 
@@ -166,23 +171,36 @@
       console.warn("[Wellness OTA] notifyAppReady a échoué :", error);
     }
 
-    // Leave the application UI time to boot, then check quietly in background.
     window.setTimeout(() => checkForWebUpdate({ force: true }), 1200);
 
     window.setInterval(() => {
-      if (document.visibilityState === "visible") {
-        checkForWebUpdate();
-      }
+      if (document.visibilityState === "visible") checkForWebUpdate();
     }, CHECK_INTERVAL_MS);
 
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        checkForWebUpdate();
-      }
+      if (document.visibilityState === "visible") checkForWebUpdate();
     });
 
     window.addEventListener("online", () => checkForWebUpdate({ force: true }));
   }
+
+  function loadHardening() {
+    if (document.getElementById("wellness-hardening-core")) return;
+    const core = document.createElement("script");
+    core.id = "wellness-hardening-core";
+    core.src = "hardening-core.js";
+    core.onload = () => {
+      const runtime = document.createElement("script");
+      runtime.id = "wellness-hardening-runtime";
+      runtime.src = "hardening.js";
+      document.body.appendChild(runtime);
+    };
+    core.onerror = () => console.error("[Wellness 4.1] Impossible de charger hardening-core.js");
+    document.body.appendChild(core);
+  }
+
+  if (document.readyState === "complete") loadHardening();
+  else window.addEventListener("load", loadHardening, { once: true });
 
   initNativeUpdates();
 })();
