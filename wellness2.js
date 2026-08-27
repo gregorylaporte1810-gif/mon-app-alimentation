@@ -6,7 +6,7 @@
 // prévisions, préférences, cloud, backup et quick-add.
 // ======================================================
 
-const W2_VERSION = "4.3.0";
+const W2_VERSION = "4.3.1";
 const W2_CORE = window.WellnessCore;
 const W2_FOODS = window.WELLNESS_FOODS || [];
 let w2SelectedFood = null;

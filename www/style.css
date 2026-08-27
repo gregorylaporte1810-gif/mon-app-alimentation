@@ -5015,3 +5015,83 @@ body.w2-native-scan-active > *:not(#w2-native-scanner-ui) {
   .v43-meal-macros { margin-left:44px; margin-right:36px; }
   .v43-meal-actions { padding-left:44px; }
 }
+
+
+/* ======================================================
+   WELLNESS V4.3.1 IPHONE SAFE AREA + SUGGESTION CARDS
+====================================================== */
+
+/*
+  Dans le WebView Capacitor iOS, env(safe-area-inset-top) peut être
+  inférieur à l'espace réellement occupé par la Dynamic Island.
+  On réserve donc une hauteur minimale uniquement dans l'app native iOS.
+*/
+@media (max-width: 700px) {
+  html.wellness-native-ios.premium-v3 .app {
+    padding-top: max(68px, calc(env(safe-area-inset-top) + 18px)) !important;
+  }
+
+  html.wellness-native-ios.premium-v3 .px-header {
+    padding-top: 0 !important;
+  }
+}
+
+/*
+  V4.3 utilisait la même grille pour les cartes "Récents" et les
+  suggestions. Les suggestions n'ont pas d'icône en première colonne :
+  leur titre finissait donc comprimé dans une colonne très étroite.
+*/
+.v43-suggestion {
+  flex: 0 0 min(270px, 78vw) !important;
+  min-height: 88px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  align-content: center !important;
+  gap: 7px !important;
+  padding: 13px 14px !important;
+}
+
+.v43-suggestion strong {
+  display: -webkit-box;
+  width: 100%;
+  overflow: hidden;
+  color: #eef4ff;
+  font-size: .79rem !important;
+  font-weight: 800;
+  line-height: 1.28 !important;
+  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.v43-suggestion small {
+  display: block;
+  width: 100%;
+  color: #8294af !important;
+  font-size: .67rem !important;
+  line-height: 1.35 !important;
+  white-space: normal;
+}
+
+.v43-suggestion-row {
+  gap: 10px !important;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 1px;
+}
+
+.v43-suggestion {
+  scroll-snap-align: start;
+}
+
+/* Un peu plus de respiration sur les très petits iPhone. */
+@media (max-width: 410px) {
+  html.wellness-native-ios.premium-v3 .app {
+    padding-top: max(66px, calc(env(safe-area-inset-top) + 17px)) !important;
+  }
+
+  .v43-suggestion {
+    flex-basis: min(250px, 82vw) !important;
+  }
+}

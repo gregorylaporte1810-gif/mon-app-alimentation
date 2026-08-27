@@ -430,6 +430,12 @@
   function configureNativeUi() {
     if (!isNative()) return;
 
+    const nativePlatform = cap.getPlatform?.();
+    document.documentElement.classList.add("wellness-native");
+    if (nativePlatform === "ios") {
+      document.documentElement.classList.add("wellness-native-ios");
+    }
+
     const pwaStatus = document.getElementById("mega-pwa-status");
     if (pwaStatus) pwaStatus.textContent = cap.getPlatform?.() === "ios" ? "iPhone" : "Application";
 
