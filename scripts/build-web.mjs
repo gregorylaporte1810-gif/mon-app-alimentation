@@ -37,6 +37,7 @@ const files = [
   "ota-updater.js",
   "ux-shell.js",
   "native-bridge.js",
+  "health-v5.js",
   "manifest.webmanifest",
   "sw.js",
 ];

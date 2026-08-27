@@ -25,6 +25,7 @@ on:
       - "ota-updater.js"
       - "ux-shell.js"
       - "native-bridge.js"
+      - "health-v5.js"
       - "manifest.webmanifest"
       - "sw.js"
       - "icons/**"
@@ -74,7 +75,7 @@ jobs:
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="4.4.0-${GITHUB_SHA::12}"
+          VERSION="5.0.0-${GITHUB_SHA::12}"
           rm -rf /tmp/wellness-ota
           mkdir -p /tmp/wellness-ota
           (
@@ -85,7 +86,7 @@ jobs:
           cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
-            "appVersion": "4.4.0",
+            "appVersion": "5.0.0",
             "schemaVersion": 4,
             "sourceCommit": "${GITHUB_SHA}",
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",

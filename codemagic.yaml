@@ -32,6 +32,8 @@ workflows:
           pod install --repo-update
           cd ../..
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :NSHealthShareUsageDescription" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :NSHealthUpdateUsageDescription" ios/App/App/Info.plist
 
       - name: Build unsigned iOS Simulator app
         script: |
@@ -81,6 +83,8 @@ workflows:
           pod install --repo-update
           cd ../..
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :NSHealthShareUsageDescription" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :NSHealthUpdateUsageDescription" ios/App/App/Info.plist
 
       - name: Build unsigned iPhone app
         script: |
@@ -101,6 +105,9 @@ workflows:
           APP_PATH="build/ios-device/Build/Products/Release-iphoneos/App.app"
           test -d "$APP_PATH"
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$APP_PATH/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :NSHealthShareUsageDescription" "$APP_PATH/Info.plist"
+          /usr/bin/codesign --force --deep --sign - --entitlements ios/App/App/App.entitlements "$APP_PATH"
+          /usr/bin/codesign -d --entitlements :- "$APP_PATH" 2>&1 | grep -q "com.apple.developer.healthkit"
           rm -rf build/unsigned-ipa
           mkdir -p build/unsigned-ipa/Payload
           cp -R "$APP_PATH" build/unsigned-ipa/Payload/App.app

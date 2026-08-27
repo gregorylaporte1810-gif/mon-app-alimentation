@@ -42,3 +42,42 @@ if (!verified.includes(cameraKey) || !verified.includes("Wellness utilise la cam
 }
 
 console.log("✅ iOS configuré : deployment target 15.5 + NSCameraUsageDescription vérifié.");
+
+
+const healthShareKey = "<key>NSHealthShareUsageDescription</key>";
+const healthShareValue = "<string>Wellness lit les données Apple Santé que tu autorises pour synchroniser tes pas, ton sommeil, ton poids et ton activité.</string>";
+const healthUpdateKey = "<key>NSHealthUpdateUsageDescription</key>";
+const healthUpdateValue = "<string>Wellness écrit uniquement les données que tu choisis explicitement, comme ton poids.</string>";
+
+let healthInfo = readFileSync(plist, "utf8");
+for (const [key, value] of [[healthShareKey, healthShareValue], [healthUpdateKey, healthUpdateValue]]) {
+  if (!healthInfo.includes(key)) {
+    const close = healthInfo.lastIndexOf("</dict>");
+    if (close === -1) throw new Error("Info.plist invalide.");
+    healthInfo = healthInfo.slice(0, close) + `  ${key}\n  ${value}\n` + healthInfo.slice(close);
+  }
+}
+writeFileSync(plist, healthInfo);
+
+const entitlements = "ios/App/App/App.entitlements";
+const entitlementXml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>com.apple.developer.healthkit</key>
+  <true/>
+</dict>
+</plist>
+`;
+writeFileSync(entitlements, entitlementXml);
+
+const project = "ios/App/App.xcodeproj/project.pbxproj";
+if (existsSync(project)) {
+  let pbx = readFileSync(project, "utf8");
+  if (!pbx.includes("CODE_SIGN_ENTITLEMENTS = App/App.entitlements;")) {
+    pbx = pbx.replace(/(PRODUCT_BUNDLE_IDENTIFIER = com\.gregorylaporte1810\.wellness;)/g, "CODE_SIGN_ENTITLEMENTS = App/App.entitlements;\n\t\t\t\t$1");
+    writeFileSync(project, pbx);
+  }
+}
+
+console.log("✅ HealthKit : usage descriptions + entitlements injectés.");
