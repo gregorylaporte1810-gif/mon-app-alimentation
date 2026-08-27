@@ -26,6 +26,7 @@ const files = [
   "data-foods.js",
   "cloud.js",
   "ota-updater.js",
+  "ux-shell.js",
   "manifest.webmanifest",
   "sw.js",
 ];

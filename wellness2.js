@@ -366,7 +366,7 @@ function w2RecommendedRecipes(){
 function w2RenderForYou(){
   const grid=document.getElementById("w2-for-you-grid");if(!grid)return;const a=w2NormalizeAccount(), totals=megaJournalTotals(a), remaining=Number(a.objectifCalories)>0?Math.max(0,Math.round(Number(a.objectifCalories)-totals.calories)):null;grid.innerHTML="";
   const recipesList=w2RecommendedRecipes();if(!recipesList.length){grid.innerHTML='<p class="message-vide">Aucune recette ne correspond à tes préférences actuelles.</p>';return;}
-  recipesList.forEach(r=>{const card=document.createElement("div");card.className="w2-recommendation-card";const pct=remaining?Math.round(r.calories/remaining*100):null;card.innerHTML=`<span class="w2-fit">${pct!==null?`${pct}% des kcal restantes`:"Suggestion"}</span><h3>${w2Escape(r.nom)}</h3><p>${r.calories} kcal · ${r.proteines} g protéines · ${r.temps} min</p><button>Voir la recette</button>`;card.querySelector("button").addEventListener("click",()=>{afficherDetailRecette(r);afficherPage("recettes");setTimeout(()=>document.getElementById("detail-recette")?.scrollIntoView({behavior:"smooth",block:"start"}),180);});grid.appendChild(card);});
+  recipesList.forEach(r=>{const card=document.createElement("div");card.className="w2-recommendation-card";const pct=remaining?Math.round(r.calories/remaining*100):null;card.innerHTML=`<span class="w2-fit">${pct!==null?`${pct}% des kcal restantes`:"Suggestion"}</span><h3>${w2Escape(r.nom)}</h3><p>${r.calories} kcal · ${r.proteines} g protéines · ${r.temps} min</p><button>Voir la recette</button>`;card.querySelector("button").addEventListener("click",()=>{window.WellnessUX?.showTab("nutrition","recipes");afficherDetailRecette(r);afficherPage("recettes");setTimeout(()=>document.getElementById("detail-recette")?.scrollIntoView({behavior:"smooth",block:"start"}),180);});grid.appendChild(card);});
   const label=document.getElementById("w2-for-you-label");if(label)label.textContent=remaining!==null?`${remaining} kcal restantes`:"Selon tes préférences";
 }
 
@@ -460,9 +460,9 @@ document.querySelectorAll("[data-w2-quick]").forEach(btn=>btn.addEventListener("
   if(action==="food")megaOpenOverlay(document.getElementById("w2-food-overlay"));
   if(action==="barcode")w2OpenBarcode();
   if(action==="photo")w2OpenPhoto();
-  if(action==="weight"){afficherPage("suivi");setTimeout(()=>document.getElementById("mega-weight-input")?.focus(),220);}
-  if(action==="activity"){afficherPage("suivi");setTimeout(()=>document.getElementById("w2-activity-duration")?.focus(),220);}
-  if(action==="wellness"){afficherPage("suivi");setTimeout(()=>document.getElementById("w2-sleep-hours")?.focus(),220);}
+  if(action==="weight"){window.WellnessUX?.showTab("progress","body");afficherPage("suivi");setTimeout(()=>document.getElementById("mega-weight-input")?.focus(),220);}
+  if(action==="activity"){window.WellnessUX?.showTab("progress","today");afficherPage("suivi");setTimeout(()=>document.getElementById("w2-activity-duration")?.focus(),220);}
+  if(action==="wellness"){window.WellnessUX?.showTab("progress","today");afficherPage("suivi");setTimeout(()=>document.getElementById("w2-sleep-hours")?.focus(),220);}
 }));
 
 document.addEventListener("pointerup",event=>{if(event.target.closest("button")||event.target.closest(".w2-file-button"))w2Haptic(8);},{passive:true});
@@ -475,7 +475,7 @@ document.addEventListener("touchstart",event=>{
 
   // Ne jamais déclencher le changement de page depuis une zone qui se
   // fait défiler horizontalement, notamment le planning des repas.
-  if(target.closest("input,textarea,select,.modal-simple,.modal-filtres,.meal-plan-grid,[data-horizontal-scroll]"))return;
+  if(target.closest("input,textarea,select,.modal-simple,.modal-filtres,.meal-plan-grid,.ux-segmented-tabs,.smart-filter-row,[data-horizontal-scroll],[data-ux-scroll]"))return;
 
   w2SwipeStart={
     x:event.touches[0].clientX,
@@ -490,8 +490,8 @@ document.addEventListener("touchend",event=>{const a=w2NormalizeAccount();if(!a.
 // ======================================================
 
 const W2_TRANSLATIONS = {
-  fr:{nav:["Accueil","Recettes","Favoris","Plan","Suivi","Profil"],coach:"Ton coach du jour",forYou:"Pour toi"},
-  en:{nav:["Home","Recipes","Favorites","Plan","Tracking","Profile"],coach:"Your daily coach",forYou:"For you"}
+  fr:{nav:["Aujourd’hui","Nutrition","Plan","Progrès","Moi"],coach:"Ton coach du jour",forYou:"Pour toi"},
+  en:{nav:["Today","Nutrition","Plan","Progress","Me"],coach:"Your daily coach",forYou:"For you"}
 };
 function w2LoadSettings(){
   const a=w2NormalizeAccount(),s=a.w2.settings;const units=document.getElementById("w2-units"),lang=document.getElementById("w2-language"),hap=document.getElementById("w2-haptics"),gest=document.getElementById("w2-gestures");if(units)units.value=s.units;if(lang)lang.value=s.language;if(hap)hap.checked=!!s.haptics;if(gest)gest.checked=!!s.gestures;

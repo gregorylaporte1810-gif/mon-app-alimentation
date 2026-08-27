@@ -3998,6 +3998,7 @@ function mettreAJourFavoris() {
     boutonRetirer.textContent = "💔 Retirer";
 
     boutonDetails.addEventListener("click", () => {
+      window.WellnessUX?.showTab("nutrition", "recipes");
       afficherPage("recettes");
       afficherDetailRecette(uneRecette);
     });

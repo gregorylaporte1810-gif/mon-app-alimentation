@@ -3125,3 +3125,572 @@ html[data-theme="light"] .w2-notification-button { border-color:rgba(100,116,139
   .w2-fab { right:14px; bottom:max(82px,calc(env(safe-area-inset-bottom) + 76px)); }
   .w2-notification-button { right:19px; bottom:max(148px,calc(env(safe-area-inset-bottom) + 142px)); }
 }
+
+/* ======================================================
+   WELLNESS UX 3 — SIMPLIFIED APP SHELL
+   5 destinations + contextual sub-navigation
+====================================================== */
+
+html.ux-simplified .app {
+  max-width: 1080px;
+}
+
+html.ux-simplified .header {
+  margin-bottom: 18px;
+}
+
+html.ux-simplified .navigation-principale {
+  width: min(94%, 680px);
+  gap: 6px;
+  padding: 8px;
+}
+
+html.ux-simplified .nav-bouton {
+  min-width: 0;
+  padding: 9px 7px 8px;
+  border-radius: 18px;
+}
+
+html.ux-simplified .nav-bouton small {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: .66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Segmented sub-navigation ---------- */
+.ux-tab-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.ux-segmented-tabs {
+  position: sticky;
+  z-index: 70;
+  top: 10px;
+  display: flex;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 4px;
+  padding: 6px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border: 1px solid rgba(148,163,184,.13);
+  border-radius: 19px;
+  background: rgba(8,17,31,.82);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  box-shadow: 0 14px 34px rgba(0,0,0,.22);
+}
+
+.ux-segmented-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ux-segmented-tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 43px;
+  padding: 9px 16px;
+  border-radius: 14px;
+  color: #8796ab;
+  background: transparent;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.ux-segmented-tab span {
+  font-size: .92rem;
+}
+
+.ux-segmented-tab strong {
+  font-size: .77rem;
+  font-weight: 850;
+}
+
+.ux-segmented-tab small {
+  display: none;
+}
+
+.ux-segmented-tab:hover:not(:disabled) {
+  transform: none;
+  color: #dce6f2;
+  background: rgba(255,255,255,.035);
+  box-shadow: none;
+}
+
+.ux-segmented-tab.active {
+  color: white;
+  background: linear-gradient(135deg, rgba(37,99,235,.96), rgba(59,130,246,.92));
+  box-shadow: 0 8px 18px rgba(37,99,235,.22);
+}
+
+.ux-tab-panels,
+.ux-tab-panel {
+  min-width: 0;
+}
+
+.ux-tab-panel {
+  animation: uxPanelIn .26s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes uxPanelIn {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ux-section-intro {
+  margin-bottom: 16px;
+  padding: 2px 2px 0;
+}
+
+.ux-section-intro h2 {
+  margin-bottom: 5px;
+}
+
+.ux-section-intro p:last-child {
+  margin-bottom: 0;
+  color: var(--text-faint);
+  font-size: .84rem;
+  line-height: 1.55;
+}
+
+/* ---------- Today: compact essentials ---------- */
+.ux-home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.ux-home-shortcuts button {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 9px;
+  align-items: center;
+  min-height: 72px;
+  padding: 13px 14px;
+  text-align: left;
+  color: var(--text);
+  border: 1px solid var(--border-soft);
+  border-radius: 17px;
+  background: rgba(255,255,255,.028);
+  box-shadow: none;
+}
+
+.ux-home-shortcuts button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(96,165,250,.22);
+  background: rgba(96,165,250,.055);
+  box-shadow: none;
+}
+
+.ux-home-shortcuts button > span {
+  grid-row: 1 / 3;
+  font-size: 1.25rem;
+}
+
+.ux-home-shortcuts strong {
+  align-self: end;
+  font-size: .78rem;
+}
+
+.ux-home-shortcuts small {
+  align-self: start;
+  color: var(--text-faint);
+  font-size: .66rem;
+}
+
+.w2-coach-panel:not(.ux-expanded) .w2-coach-recommendations > *:nth-child(n+3) {
+  display: none;
+}
+
+.ux-coach-toggle {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.ux-home-more {
+  margin-top: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ux-home-more > summary,
+.ux-settings-group > summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 13px;
+  min-height: 72px;
+  padding: 15px 17px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.ux-home-more > summary::-webkit-details-marker,
+.ux-settings-group > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ux-home-more > summary strong,
+.ux-settings-group > summary strong {
+  display: block;
+  color: var(--text);
+  font-size: .84rem;
+}
+
+.ux-home-more > summary small,
+.ux-settings-group > summary small {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-faint);
+  font-size: .68rem;
+  line-height: 1.35;
+}
+
+.ux-settings-icon {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border: 1px solid rgba(96,165,250,.13);
+  border-radius: 13px;
+  background: rgba(96,165,250,.075);
+  font-size: 1.05rem;
+}
+
+.ux-chevron {
+  color: #718096;
+  font-size: 1.55rem;
+  font-weight: 500;
+  transform: rotate(0deg);
+  transition: transform .2s ease;
+}
+
+.ux-home-more[open] > summary .ux-chevron,
+.ux-settings-group[open] > summary .ux-chevron {
+  transform: rotate(90deg);
+}
+
+.ux-home-more-body {
+  padding: 2px 14px 16px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.ux-home-more-body > :first-child {
+  margin-top: 14px;
+}
+
+.ux-home-more-body > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Nutrition ---------- */
+.ux-nutrition-summary {
+  margin-bottom: 14px;
+  padding: 19px;
+}
+
+.ux-summary-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.ux-summary-heading h2 {
+  margin-bottom: 0;
+}
+
+.ux-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 8px;
+}
+
+.ux-summary-grid > div {
+  padding: 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+}
+
+.ux-summary-grid span,
+.ux-summary-grid strong {
+  display: block;
+}
+
+.ux-summary-grid span {
+  margin-bottom: 5px;
+  color: var(--text-faint);
+  font-size: .68rem;
+  font-weight: 750;
+}
+
+.ux-summary-grid strong {
+  color: var(--text);
+  font-size: .92rem;
+}
+
+.ux-inline-actions {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ux-inline-actions button {
+  margin: 0;
+}
+
+.ux-nutrition-objectives {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px;
+  margin: 0 0 18px;
+}
+
+.ux-nutrition-objectives .objectif-card {
+  margin: 0;
+}
+
+/* ---------- Profile / Me: settings accordion ---------- */
+.ux-profile-intro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 13px;
+  padding: 18px 20px;
+}
+
+.ux-profile-intro h2,
+.ux-profile-intro p {
+  margin-bottom: 3px;
+}
+
+.ux-profile-intro p:last-child {
+  color: var(--text-faint);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.ux-profile-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, rgba(37,99,235,.28), rgba(124,58,237,.22));
+  font-size: 1.45rem;
+}
+
+.ux-settings-list {
+  display: grid;
+  gap: 9px;
+}
+
+.ux-settings-group {
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  background: rgba(17,27,45,.66);
+  box-shadow: var(--shadow-xs);
+}
+
+.ux-settings-group > summary {
+  transition: background .18s ease;
+}
+
+.ux-settings-group > summary:hover {
+  background: rgba(255,255,255,.026);
+}
+
+.ux-settings-group[open] > summary {
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(96,165,250,.035);
+}
+
+.ux-settings-content {
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+}
+
+.ux-settings-content > .profil-carte {
+  margin: 0;
+}
+
+.ux-danger-group {
+  border-color: rgba(251,113,133,.16);
+}
+
+.ux-danger-group .ux-settings-icon {
+  border-color: rgba(251,113,133,.16);
+  background: rgba(251,113,133,.07);
+}
+
+/* ---------- Improve nested page density ---------- */
+.ux-tab-panel > .mega-section:first-child,
+.ux-tab-panel > .suivi-resume:first-child,
+.ux-tab-panel > .plan-section:first-child {
+  margin-top: 0;
+}
+
+.ux-tab-panel .mega-section,
+.ux-tab-panel .historique-section,
+.ux-tab-panel .badges-section,
+.ux-tab-panel .recompenses-section {
+  scroll-margin-top: 90px;
+}
+
+/* ---------- Light theme ---------- */
+html[data-theme="light"].ux-simplified .ux-segmented-tabs {
+  border-color: rgba(100,116,139,.15);
+  background: rgba(236,241,247,.88);
+}
+
+html[data-theme="light"].ux-simplified .ux-segmented-tab {
+  color: #64748b;
+}
+
+html[data-theme="light"].ux-simplified .ux-segmented-tab.active {
+  color: white;
+}
+
+html[data-theme="light"] .ux-home-shortcuts button,
+html[data-theme="light"] .ux-summary-grid > div,
+html[data-theme="light"] .ux-settings-group {
+  border-color: rgba(100,116,139,.12);
+  background: rgba(255,255,255,.42);
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 700px) {
+  html.ux-simplified .app {
+    padding: 18px 13px max(120px, calc(env(safe-area-inset-bottom) + 112px));
+  }
+
+  html.ux-simplified .header {
+    margin-bottom: 13px;
+    padding: 24px 21px;
+    border-radius: 26px;
+  }
+
+  html.ux-simplified .header h1 {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+  }
+
+  .ux-segmented-tabs {
+    position: sticky;
+    top: max(7px, env(safe-area-inset-top));
+    width: 100%;
+    justify-content: flex-start;
+    margin-bottom: 0;
+    border-radius: 17px;
+  }
+
+  .ux-segmented-tab {
+    flex: 1 0 auto;
+    min-width: max-content;
+    min-height: 41px;
+    padding: 8px 13px;
+  }
+
+  .ux-home-shortcuts {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 8px;
+  }
+
+  .ux-home-shortcuts button {
+    min-height: 66px;
+  }
+
+  .ux-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ux-summary-grid > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .ux-inline-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ux-inline-actions > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .ux-nutrition-objectives {
+    grid-template-columns: 1fr;
+  }
+
+  .ux-profile-intro {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .ux-home-more > summary,
+  .ux-settings-group > summary {
+    min-height: 68px;
+    padding: 13px 14px;
+  }
+
+  html.ux-simplified .navigation-principale {
+    width: calc(100% - 18px);
+    padding: 7px;
+    border-radius: 22px;
+  }
+
+  html.ux-simplified .nav-bouton {
+    padding: 8px 3px 7px;
+    border-radius: 16px;
+  }
+
+  html.ux-simplified .nav-bouton small {
+    font-size: .58rem;
+  }
+
+  html.ux-simplified .nav-icon {
+    width: 19px;
+    height: 19px;
+  }
+
+  html.ux-simplified .w2-fab {
+    right: 14px;
+    width: 54px;
+    height: 54px;
+    bottom: max(80px, calc(env(safe-area-inset-bottom) + 74px));
+    border-radius: 18px;
+  }
+
+  html.ux-simplified .w2-notification-button {
+    display: none;
+  }
+}
+
+@media (max-width: 390px) {
+  .ux-segmented-tab {
+    gap: 5px;
+    padding-inline: 11px;
+  }
+
+  .ux-segmented-tab strong {
+    font-size: .72rem;
+  }
+
+  html.ux-simplified .nav-bouton small {
+    font-size: .55rem;
+  }
+}
