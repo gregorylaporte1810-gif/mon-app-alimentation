@@ -30,6 +30,7 @@
   let activeSheetNodes = [];
   let sheetReturnParent = null;
   let plannerEditSource = null;
+  let premiumJournalSignature = "";
 
   function safeMove(node, parent = vault) {
     if (node && parent) parent.appendChild(node);
@@ -630,6 +631,26 @@
     if (!list) return;
     const entries = account.journalCalories || [];
     const slots = ["Petit-déjeuner", "Déjeuner", "Dîner", "Collation"];
+    const journalSignature = JSON.stringify(entries.map((entry) => [
+      entry.id,
+      entry.nom,
+      entry.calories,
+      entry.proteines,
+      entry.glucides,
+      entry.lipides,
+      entry.repasSlot,
+      entry.quantity,
+      entry.unit,
+    ]));
+
+    // Ne reconstruit pas le DOM toutes les 1,5 s si rien n'a changé.
+    // Cela préserve le scroll, les boutons Recettes/Favoris et les
+    // décorations ajoutées par V4.3.
+    if (journalSignature === premiumJournalSignature) return;
+    premiumJournalSignature = journalSignature;
+
+    const scrollBefore = window.scrollY;
+    const preserveScroll = document.getElementById("page-recettes")?.classList.contains("active") && scrollBefore > 0;
 
     list.innerHTML = slots.map((slot) => {
       const slotEntries = entries.filter((entry) => (entry.repasSlot || "Déjeuner") === slot);
@@ -661,6 +682,12 @@
         ${rows || `<button type="button" class="px-journal-empty" data-journal-slot="${esc(slot)}">Ajouter un aliment</button>`}
       </section>`;
     }).join("");
+
+    if (preserveScroll) {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollBefore, behavior: "auto" });
+      });
+    }
   }
 
   function plannerCards() {
@@ -1029,7 +1056,9 @@
       plannerDayIndex = plannerInitialIndex(plannerCards());
       syncPremiumUI();
       observeAppChanges();
-      window.setInterval(syncPremiumUI, 1500);
+      window.setInterval(() => {
+      if (document.visibilityState === "visible") syncPremiumUI();
+    }, 3000);
     }, 180);
   }
 

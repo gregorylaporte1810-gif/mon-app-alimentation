@@ -39,6 +39,8 @@ const files = [
   "native-bridge.js",
   "health-v5.js",
   "health-v501-guard.js",
+  "polish-v51-core.js",
+  "polish-v51.js",
   "manifest.webmanifest",
   "sw.js",
 ];
