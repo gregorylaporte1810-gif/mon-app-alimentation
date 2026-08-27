@@ -34,16 +34,16 @@ permissions:
   contents: write
 
 concurrency:
-  group: wellness-ota-main
+  group: wellness-ota-channel
   cancel-in-progress: true
 
 jobs:
   publish:
-    name: Verify, build and publish bootstrap OTA
+    name: Verify and publish dedicated OTA channel
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -63,38 +63,52 @@ jobs:
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="4.1.0-bootstrap-${GITHUB_SHA::12}"
-          rm -rf ota
-          mkdir -p ota
+          VERSION="4.1.0-${GITHUB_SHA::12}"
+          rm -rf /tmp/wellness-ota
+          mkdir -p /tmp/wellness-ota
           (
             cd www
-            zip -qr ../ota/wellness-web.zip .
+            zip -qr /tmp/wellness-ota/wellness-web.zip .
           )
 
-          cat > ota/latest.json <<EOF
+          cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
             "appVersion": "4.1.0",
             "schemaVersion": 4,
-            "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/wellness-web.zip",
-            "message": "Wellness 4.1 - fiabilisation",
+            "sourceCommit": "${GITHUB_SHA}",
+            "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",
+            "message": "Mise à jour automatique Wellness",
             "publishedAt": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           }
           EOF
 
-      # One final main-branch publication is intentional. It upgrades older
-      # installed apps to the updater that knows the dedicated `ota` branch.
-      - name: Commit bootstrap OTA bundle
+      - name: Publish to dedicated ota branch
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f ota/latest.json ota/wellness-web.zip
+
+          git reset --hard
+          git clean -fdx
+
+          if git ls-remote --exit-code --heads origin ota >/dev/null 2>&1; then
+            git fetch origin ota:ota
+            git switch ota
+          else
+            git switch --orphan ota
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp /tmp/wellness-ota/latest.json ./latest.json
+          cp /tmp/wellness-ota/wellness-web.zip ./wellness-web.zip
+          git add -A
 
           if git diff --cached --quiet; then
             echo "Aucun changement OTA."
             exit 0
           fi
 
-          git commit -m "chore: publish Wellness 4.1 bootstrap OTA [skip ci]"
-          git push origin HEAD:main
+          git commit -m "chore: publish Wellness OTA ${GITHUB_SHA::12}"
+          git push origin ota
