@@ -37,3 +37,56 @@ workflows:
     artifacts:
       - build/ios-simulator/Build/Products/Debug-iphonesimulator/App.app
       - /tmp/xcodebuild_logs/*.log
+
+  ios-device-unsigned:
+    name: Wellness - iPhone unsigned IPA
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+
+    environment:
+      node: 22
+      xcode: latest
+
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+
+      - name: Build web assets
+        script: |
+          npm run build:web
+
+      - name: Create Capacitor iOS project
+        script: |
+          rm -rf ios
+          node node_modules/@capacitor/cli/bin/capacitor add ios
+          node node_modules/@capacitor/cli/bin/capacitor sync ios
+
+      - name: Build unsigned iPhone app
+        script: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/ios-device \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package unsigned IPA
+        script: |
+          APP_PATH="build/ios-device/Build/Products/Release-iphoneos/App.app"
+          test -d "$APP_PATH"
+          rm -rf build/unsigned-ipa
+          mkdir -p build/unsigned-ipa/Payload
+          cp -R "$APP_PATH" build/unsigned-ipa/Payload/App.app
+          cd build/unsigned-ipa
+          zip -qry ../Wellness-unsigned.ipa Payload
+          cd ../..
+          ls -lh build/Wellness-unsigned.ipa
+
+    artifacts:
+      - build/Wellness-unsigned.ipa
+      - /tmp/xcodebuild_logs/*.log
