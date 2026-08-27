@@ -1,4 +1,4 @@
-# Wellness 5.3 — Usability
+# Wellness 5.3.1 — Usability
 
 Cette version répond aux retours d'utilisation sur un deuxième iPhone.
 
@@ -60,7 +60,7 @@ On revient donc directement à Nutrition.
 ## Installation
 
 ```powershell
-node .\apply-v53-usability.mjs
+node .\apply-v531-usability.mjs
 npm install
 npm run verify
 
@@ -72,3 +72,14 @@ git push
 Aucun nouveau plugin natif : **OTA uniquement**.
 
 La **PWA reçoit les mêmes changements**.
+
+
+## 5. Plus de zoom au double-tap
+
+Le double-tap accidentel ne zoome plus Wellness.
+
+La correction utilise :
+- `touch-action: manipulation` sur l'interface ;
+- une garde iOS sur deux touchers successifs très rapprochés.
+
+Le **pinch-to-zoom à deux doigts reste disponible**.

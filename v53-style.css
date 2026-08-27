@@ -130,3 +130,24 @@ html.v53-mobile-viewport-repair .px-header h1 {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+/* ------------------------------------------------------
+   Double-tap zoom
+   `manipulation` garde le scroll normal et le pinch zoom,
+   mais supprime le double-tap zoom.
+------------------------------------------------------ */
+html,
+body,
+.app,
+.page,
+button,
+a,
+input,
+select,
+textarea,
+[role="button"],
+[data-ux-action],
+[data-w2-quick] {
+  touch-action: manipulation;
+}

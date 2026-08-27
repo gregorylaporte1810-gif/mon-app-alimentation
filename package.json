@@ -1,8 +1,8 @@
 {
   "name": "wellness-2-pro",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "private": true,
-  "description": "Wellness 5.3 - iPhone compatibility, editable steps and liquid volume units",
+  "description": "Wellness 5.3.1 - iPhone compatibility, editable steps, liquid units and double-tap zoom guard",
   "scripts": {
     "test": "node scripts/test-core.mjs && npm run test:food && npm run test:daily && npm run test:smart && npm run test:polish && npm run test:final && npm run test:micro && npm run test:usability",
     "check:syntax": "node --check app.js && node --check features.js && node --check wellness2.js && node --check ux-shell.js && node --check core-utils.js && node --check cloud.js && node --check ota-updater.js && node --check native-bridge.js && node --check hardening-core.js && node --check hardening.js && node --check food-units-core.js && node --check food-v42.js && node --check data-foods-ciqual.js && node --check daily-ux-core-v43.js && node --check daily-ux-v43.js && node --check smart-v44-core.js && node --check smart-v44.js && node --check health-v5.js && node --check health-v501-guard.js && node --check polish-v51-core.js && node --check polish-v51.js && node --check final-v52-core.js && node --check final-v52.js && node --check viewport-v53.js && node --check ux-v53-core.js && node --check ux-v53.js",

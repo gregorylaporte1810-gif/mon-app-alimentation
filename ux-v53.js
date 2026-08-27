@@ -8,7 +8,7 @@
     return;
   }
 
-  const VERSION = "5.3.0";
+  const VERSION = "5.3.1";
   let observerTimer = 0;
 
   // =====================================================
@@ -237,6 +237,26 @@
     try { before = obtenirCompteActif()?.journalCalories?.length || 0; } catch {}
     setTimeout(() => closeFoodParentsIfJournalChanged(Math.max(0, before - 1)), 50);
   });
+
+
+  // =====================================================
+  // DOUBLE-TAP — EMPÊCHE LE ZOOM ACCIDENTEL
+  // Le pincement à deux doigts reste disponible.
+  // =====================================================
+
+  let lastTouchEnd = 0;
+
+  document.addEventListener("touchend", (event) => {
+    if (event.changedTouches?.length !== 1) return;
+
+    const now = Date.now();
+    const elapsed = now - lastTouchEnd;
+    lastTouchEnd = now;
+
+    if (elapsed > 0 && elapsed < 320) {
+      event.preventDefault();
+    }
+  }, { passive: false });
 
   // =====================================================
   // REFRESH

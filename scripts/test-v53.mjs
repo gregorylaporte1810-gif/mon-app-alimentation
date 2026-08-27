@@ -82,3 +82,20 @@ for (const [name, fn] of tests) {
 
 console.log(`\n${passed} / ${tests.length} tests Wellness V5.3 réussis`);
 if (passed !== tests.length) process.exit(1);
+
+
+const runtimeCode = readFileSync("ux-v53.js", "utf8");
+const styleCode = readFileSync("v53-style.css", "utf8");
+
+const extraChecks = [
+  ["double-tap runtime guard is installed", runtimeCode.includes("elapsed < 320") && runtimeCode.includes("event.preventDefault()")],
+  ["touch-action manipulation is installed", styleCode.includes("touch-action: manipulation")],
+];
+
+for (const [name, ok] of extraChecks) {
+  if (!ok) {
+    console.error(`❌ ${name}`);
+    process.exit(1);
+  }
+  console.log(`✅ ${name}`);
+}
