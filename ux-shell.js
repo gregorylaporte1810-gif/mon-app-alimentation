@@ -149,9 +149,14 @@
         <button type="button" class="px-stat-card px-card" data-ux-action="food">
           <span class="px-stat-emoji">💪</span><div><strong id="px-protein-remaining">--</strong><small>protéines restantes</small></div>
         </button>
-        <button type="button" class="px-stat-card px-card" data-ux-action="water">
-          <span class="px-stat-emoji">💧</span><div><strong id="px-water-today">--</strong><small>verres</small></div>
-        </button>
+        <div class="px-stat-card px-card px-water-stat" aria-label="Hydratation">
+          <span class="px-stat-emoji">💧</span>
+          <div class="px-water-stat-copy"><strong id="px-water-today">--</strong><small>verres</small></div>
+          <div class="px-water-adjusters" aria-label="Ajuster les verres d'eau">
+            <button type="button" data-water-adjust="-1" aria-label="Retirer un verre">−</button>
+            <button type="button" data-water-adjust="1" aria-label="Ajouter un verre">+</button>
+          </div>
+        </div>
         <button type="button" class="px-stat-card px-card" data-ux-action="steps">
           <span class="px-stat-emoji">👟</span><div><strong id="px-steps-today">--</strong><small>pas</small></div>
         </button>
@@ -561,7 +566,13 @@
     const remainProtein = proteinTarget ? Math.max(0, proteinTarget - totals.protein) : null;
     setText("px-kcal-remaining", remainKcal === null ? "--" : Math.round(remainKcal).toLocaleString("fr-FR"));
     setText("px-protein-remaining", remainProtein === null ? "--" : `${Math.round(remainProtein)} g`);
-    setText("px-water-today", `${Number(account.verresEau) || 0} / ${Number(account.objectifEau) || 8}`);
+    const currentWater = Number(account.verresEau) || 0;
+    const waterGoal = Number(account.objectifEau) || 8;
+    setText("px-water-today", `${currentWater} / ${waterGoal}`);
+    const waterMinus = document.querySelector('[data-water-adjust="-1"]');
+    const waterPlus = document.querySelector('[data-water-adjust="1"]');
+    if (waterMinus) waterMinus.disabled = currentWater <= 0;
+    if (waterPlus) waterPlus.disabled = currentWater >= waterGoal;
     setText("px-steps-today", `${(Number(account.pasEffectues) || 0).toLocaleString("fr-FR")} / ${(Number(account.objectifPas) || 10000).toLocaleString("fr-FR")}`);
 
     const mealMap = [
@@ -618,17 +629,37 @@
     const list = byId("px-journal-list");
     if (!list) return;
     const entries = account.journalCalories || [];
-    const slots = ["Petit-déjeuner", "Déjeuner", "Dîner"];
+    const slots = ["Petit-déjeuner", "Déjeuner", "Dîner", "Collation"];
+
     list.innerHTML = slots.map((slot) => {
       const slotEntries = entries.filter((entry) => (entry.repasSlot || "Déjeuner") === slot);
       const kcal = slotEntries.reduce((sum, entry) => sum + (Number(entry.calories) || 0), 0);
-      const names = slotEntries.map((entry) => entry.nom).filter(Boolean).slice(0, 3).join(", ");
-      const empty = !slotEntries.length;
-      return `<button type="button" class="px-journal-row" data-journal-slot="${esc(slot)}">
-        <span class="px-journal-icon">${mealIcon(slot)}</span>
-        <span class="px-journal-copy"><strong>${slot}</strong><small>${empty ? `Ajoute ton ${slot.toLowerCase()}` : esc(names)}</small></span>
-        <span class="px-journal-value">${empty ? '<em>Ajouter</em>' : `<strong>${Math.round(kcal)} kcal</strong>`}${svgIcon("chevron")}</span>
-      </button>`;
+
+      const rows = slotEntries.map((entry) => {
+        const macros = [
+          Number(entry.proteines) > 0 ? `P ${Math.round(Number(entry.proteines))} g` : "",
+          Number(entry.glucides) > 0 ? `G ${Math.round(Number(entry.glucides))} g` : "",
+          Number(entry.lipides) > 0 ? `L ${Math.round(Number(entry.lipides))} g` : "",
+        ].filter(Boolean).join(" · ");
+
+        return `<div class="px-journal-entry">
+          <button type="button" class="px-journal-entry-main" data-journal-edit="${esc(entry.id)}">
+            <span><strong>${esc(entry.nom || "Ajout manuel")}</strong><small>${macros || esc(entry.source === "recette" ? "Recette" : "Aliment")}</small></span>
+            <em>${Math.round(Number(entry.calories) || 0)} kcal</em>
+          </button>
+          <button type="button" class="px-journal-entry-delete" data-journal-delete="${esc(entry.id)}" aria-label="Supprimer ${esc(entry.nom || "cet aliment")}">✕</button>
+        </div>`;
+      }).join("");
+
+      return `<section class="px-journal-group">
+        <div class="px-journal-group-head">
+          <span class="px-journal-icon">${mealIcon(slot)}</span>
+          <span><strong>${slot}</strong><small>${slotEntries.length ? `${slotEntries.length} ajout${slotEntries.length > 1 ? "s" : ""}` : "Aucun aliment"}</small></span>
+          <em>${slotEntries.length ? `${Math.round(kcal)} kcal` : ""}</em>
+          <button type="button" data-journal-slot="${esc(slot)}" aria-label="Ajouter à ${esc(slot)}">+</button>
+        </div>
+        ${rows || `<button type="button" class="px-journal-empty" data-journal-slot="${esc(slot)}">Ajouter un aliment</button>`}
+      </section>`;
     }).join("");
   }
 
@@ -860,6 +891,32 @@
       const notify = event.target.closest(".px-notification-trigger");
       if (notify) return byId("w2-notification-button")?.click();
 
+      const waterAdjust = event.target.closest("[data-water-adjust]");
+      if (waterAdjust) {
+        const delta = Number(waterAdjust.dataset.waterAdjust) || 0;
+        const targetId = delta < 0 ? "retirer-eau" : "ajouter-eau";
+        byId(targetId)?.click();
+        window.setTimeout(syncPremiumUI, 40);
+        return;
+      }
+
+      const journalEdit = event.target.closest("[data-journal-edit]");
+      if (journalEdit) {
+        if (typeof window.megaOpenJournalEditor === "function") {
+          window.megaOpenJournalEditor(journalEdit.dataset.journalEdit);
+        }
+        return;
+      }
+
+      const journalDelete = event.target.closest("[data-journal-delete]");
+      if (journalDelete) {
+        const id = journalDelete.dataset.journalDelete;
+        if (typeof window.supprimerEntreeJournal === "function" && confirm("Supprimer cet ajout du journal ?")) {
+          window.supprimerEntreeJournal(id);
+        }
+        return;
+      }
+
       const action = event.target.closest("[data-ux-action]");
       if (action) {
         const key = action.dataset.uxAction;
@@ -881,6 +938,8 @@
 
       const journal = event.target.closest("[data-journal-slot]");
       if (journal) {
+        const meal = byId("w2-portion-meal");
+        if (meal && journal.dataset.journalSlot) meal.value = journal.dataset.journalSlot;
         byId("w2-open-food-search")?.click();
         return;
       }

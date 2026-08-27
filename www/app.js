@@ -834,6 +834,73 @@ function afficherCalories() {
   }
 }
 
+function recalculerCaloriesJournal(compte = obtenirCompteActif()) {
+  compte.caloriesConsommees = (compte.journalCalories || []).reduce(
+    (total, element) => total + Number(element.calories || 0),
+    0,
+  );
+
+  return compte.caloriesConsommees;
+}
+
+function trouverEntreeJournal(id, compte = obtenirCompteActif()) {
+  return (compte.journalCalories || []).find((entree) => entree.id === id) || null;
+}
+
+function modifierEntreeJournal(id, modifications = {}) {
+  const compte = obtenirCompteActif();
+  const entree = trouverEntreeJournal(id, compte);
+
+  if (!entree) {
+    return false;
+  }
+
+  const calories = Number(modifications.calories ?? entree.calories);
+
+  if (!Number.isFinite(calories) || calories <= 0) {
+    return false;
+  }
+
+  const nom = String(modifications.nom ?? entree.nom ?? "Ajout manuel").trim();
+
+  Object.assign(entree, modifications, {
+    nom: nom || "Ajout manuel",
+    calories: Math.round(calories),
+  });
+
+  ["proteines", "glucides", "lipides"].forEach((cle) => {
+    if (cle in entree) {
+      const valeur = Number(entree[cle]);
+      entree[cle] = Number.isFinite(valeur) && valeur >= 0
+        ? Math.round(valeur * 10) / 10
+        : 0;
+    }
+  });
+
+  recalculerCaloriesJournal(compte);
+  sauvegarderEtatApplication();
+  rafraichirApplication();
+  return true;
+}
+
+function supprimerEntreeJournal(id) {
+  const compte = obtenirCompteActif();
+  const longueurInitiale = (compte.journalCalories || []).length;
+
+  compte.journalCalories = (compte.journalCalories || []).filter(
+    (entree) => entree.id !== id,
+  );
+
+  if (compte.journalCalories.length === longueurInitiale) {
+    return false;
+  }
+
+  recalculerCaloriesJournal(compte);
+  sauvegarderEtatApplication();
+  rafraichirApplication();
+  return true;
+}
+
 function afficherJournalCalories() {
   const compte = obtenirCompteActif();
 
@@ -879,31 +946,30 @@ function afficherJournalCalories() {
       infos.appendChild(nom);
       infos.appendChild(details);
 
+      const actions = document.createElement("div");
+      actions.classList.add("journal-calories-actions");
+
+      const boutonModifier = document.createElement("button");
+      boutonModifier.classList.add("bouton-modifier-calories");
+      boutonModifier.setAttribute("aria-label", "Modifier cet ajout");
+      boutonModifier.textContent = "✎";
+      boutonModifier.addEventListener("click", () => {
+        if (typeof window.megaOpenJournalEditor === "function") {
+          window.megaOpenJournalEditor(entree.id);
+        }
+      });
+
       const boutonSupprimer = document.createElement("button");
       boutonSupprimer.classList.add("bouton-supprimer-calories");
       boutonSupprimer.setAttribute("aria-label", "Supprimer cet ajout");
       boutonSupprimer.textContent = "✕";
-
       boutonSupprimer.addEventListener("click", () => {
-        const compteActuel = obtenirCompteActif();
-
-        compteActuel.journalCalories =
-          compteActuel.journalCalories.filter(
-            (element) => element.id !== entree.id,
-          );
-
-        compteActuel.caloriesConsommees =
-          compteActuel.journalCalories.reduce(
-            (total, element) => total + Number(element.calories || 0),
-            0,
-          );
-
-        sauvegarderEtatApplication();
-        rafraichirApplication();
+        supprimerEntreeJournal(entree.id);
       });
 
+      actions.append(boutonModifier, boutonSupprimer);
       item.appendChild(infos);
-      item.appendChild(boutonSupprimer);
+      item.appendChild(actions);
 
       journalCaloriesElement.appendChild(item);
     });
@@ -957,11 +1023,7 @@ function ajouterCaloriesAuJournal(nom, calories, source = "manuel") {
   };
 
   compte.journalCalories.push(entree);
-  compte.caloriesConsommees =
-    compte.journalCalories.reduce(
-      (total, element) => total + Number(element.calories || 0),
-      0,
-    );
+  recalculerCaloriesJournal(compte);
 
   sauvegarderEtatApplication();
 

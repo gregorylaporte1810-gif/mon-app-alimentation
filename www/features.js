@@ -294,6 +294,175 @@ afficherJournalCalories = function megaJournalDisplay() {
 };
 
 // ======================================================
+// JOURNAL EDITOR — correction d'une entrée sans la supprimer
+// ======================================================
+
+let megaJournalEditState = null;
+
+function megaEnsureJournalEditor() {
+  let overlay = document.getElementById("mega-journal-edit-overlay");
+  if (overlay) return overlay;
+
+  overlay = document.createElement("div");
+  overlay.id = "mega-journal-edit-overlay";
+  overlay.className = "modal-simple-overlay mega-journal-edit-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.innerHTML = `
+    <section class="modal-simple mega-journal-edit-modal" role="dialog" aria-modal="true" aria-labelledby="mega-journal-edit-title">
+      <div class="modal-simple-header">
+        <div><p class="sur-titre">Journal alimentaire</p><h2 id="mega-journal-edit-title">Modifier l'ajout</h2></div>
+        <button type="button" id="mega-journal-edit-close" class="fermer-modal-simple" aria-label="Fermer">✕</button>
+      </div>
+      <div class="mega-journal-edit-grid">
+        <label class="mega-journal-edit-wide"><span>Aliment / recette</span><input id="mega-journal-edit-name" type="text" autocomplete="off"></label>
+        <label><span>Repas</span><select id="mega-journal-edit-meal"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select></label>
+        <label id="mega-journal-edit-quantity-wrap"><span id="mega-journal-edit-quantity-label">Quantité</span><input id="mega-journal-edit-quantity" type="number" min="0.1" step="1" inputmode="decimal"></label>
+        <label><span>Calories</span><div class="mega-journal-number"><input id="mega-journal-edit-kcal" type="number" min="1" step="1" inputmode="decimal"><em>kcal</em></div></label>
+        <label><span>Protéines</span><div class="mega-journal-number"><input id="mega-journal-edit-protein" type="number" min="0" step="0.1" inputmode="decimal"><em>g</em></div></label>
+        <label><span>Glucides</span><div class="mega-journal-number"><input id="mega-journal-edit-carbs" type="number" min="0" step="0.1" inputmode="decimal"><em>g</em></div></label>
+        <label><span>Lipides</span><div class="mega-journal-number"><input id="mega-journal-edit-fat" type="number" min="0" step="0.1" inputmode="decimal"><em>g</em></div></label>
+      </div>
+      <p id="mega-journal-edit-message" class="message-action"></p>
+      <div class="mega-journal-edit-actions">
+        <button type="button" id="mega-journal-edit-delete" class="mega-danger-button">Supprimer</button>
+        <button type="button" id="mega-journal-edit-cancel" class="bouton-secondaire">Annuler</button>
+        <button type="button" id="mega-journal-edit-save">Enregistrer</button>
+      </div>
+    </section>`;
+
+  document.body.appendChild(overlay);
+
+  const close = () => megaCloseOverlay(overlay);
+  document.getElementById("mega-journal-edit-close")?.addEventListener("click", close);
+  document.getElementById("mega-journal-edit-cancel")?.addEventListener("click", close);
+  overlay.addEventListener("click", (event) => { if (event.target === overlay) close(); });
+
+  document.getElementById("mega-journal-edit-quantity")?.addEventListener("input", megaScaleJournalEditFromQuantity);
+  document.getElementById("mega-journal-edit-save")?.addEventListener("click", megaSaveJournalEdit);
+  document.getElementById("mega-journal-edit-delete")?.addEventListener("click", () => {
+    if (!megaJournalEditState?.id) return;
+    if (!confirm("Supprimer cet aliment du journal ?")) return;
+    supprimerEntreeJournal(megaJournalEditState.id);
+    megaCloseOverlay(overlay);
+  });
+
+  return overlay;
+}
+
+function megaJournalBaseName(entry) {
+  if (entry?.source !== "aliment") return String(entry?.nom || "Ajout manuel");
+  return String(entry.nom || "Aliment").replace(/\\s*\\([0-9]+(?:[.,][0-9]+)?\\s*g\\)\\s*$/i, "").trim();
+}
+
+function megaScaleJournalEditFromQuantity() {
+  if (!megaJournalEditState?.quantityBase) return;
+  const quantity = Number(document.getElementById("mega-journal-edit-quantity")?.value);
+  if (!Number.isFinite(quantity) || quantity <= 0) return;
+  const factor = quantity / megaJournalEditState.quantityBase;
+  const put = (id, value, decimals = 1) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.value = decimals === 0 ? String(Math.max(1, Math.round(value * factor))) : String(Math.round(value * factor * 10) / 10);
+  };
+  put("mega-journal-edit-kcal", megaJournalEditState.caloriesBase, 0);
+  put("mega-journal-edit-protein", megaJournalEditState.proteinBase);
+  put("mega-journal-edit-carbs", megaJournalEditState.carbsBase);
+  put("mega-journal-edit-fat", megaJournalEditState.fatBase);
+}
+
+function megaOpenJournalEditor(entryId) {
+  const account = megaNormalizeAccount();
+  const entry = (account.journalCalories || []).find((item) => item.id === entryId);
+  if (!entry) return;
+
+  const overlay = megaEnsureJournalEditor();
+  const quantityWrap = document.getElementById("mega-journal-edit-quantity-wrap");
+  const quantityInput = document.getElementById("mega-journal-edit-quantity");
+  const quantityLabel = document.getElementById("mega-journal-edit-quantity-label");
+
+  let quantityBase = null;
+  if (entry.source === "aliment") quantityBase = Math.max(1, (Number(entry.portions) || 1) * 100);
+  if (entry.source === "recette") quantityBase = Math.max(0.1, Number(entry.portions) || 1);
+
+  megaJournalEditState = {
+    id: entry.id,
+    source: entry.source || "manuel",
+    quantityBase,
+    caloriesBase: Number(entry.calories) || 0,
+    proteinBase: Number(entry.proteines) || 0,
+    carbsBase: Number(entry.glucides) || 0,
+    fatBase: Number(entry.lipides) || 0,
+    baseName: megaJournalBaseName(entry),
+  };
+
+  document.getElementById("mega-journal-edit-name").value = megaJournalEditState.baseName;
+  document.getElementById("mega-journal-edit-meal").value = entry.repasSlot || "Déjeuner";
+  document.getElementById("mega-journal-edit-kcal").value = Math.round(Number(entry.calories) || 0);
+  document.getElementById("mega-journal-edit-protein").value = Number(entry.proteines) || 0;
+  document.getElementById("mega-journal-edit-carbs").value = Number(entry.glucides) || 0;
+  document.getElementById("mega-journal-edit-fat").value = Number(entry.lipides) || 0;
+  document.getElementById("mega-journal-edit-message").textContent = "";
+
+  if (quantityBase !== null) {
+    quantityWrap.hidden = false;
+    quantityInput.value = String(Math.round(quantityBase * 10) / 10);
+    quantityInput.step = entry.source === "aliment" ? "1" : "0.5";
+    quantityLabel.textContent = entry.source === "aliment" ? "Quantité (g)" : "Portions";
+  } else {
+    quantityWrap.hidden = true;
+    quantityInput.value = "";
+  }
+
+  megaOpenOverlay(overlay);
+  setTimeout(() => document.getElementById("mega-journal-edit-name")?.focus(), 80);
+}
+
+function megaSaveJournalEdit() {
+  if (!megaJournalEditState?.id) return;
+
+  const message = document.getElementById("mega-journal-edit-message");
+  const source = megaJournalEditState.source;
+  const quantity = Number(document.getElementById("mega-journal-edit-quantity")?.value);
+  let name = document.getElementById("mega-journal-edit-name")?.value.trim() || "Ajout manuel";
+  const calories = Number(document.getElementById("mega-journal-edit-kcal")?.value);
+  const protein = Number(document.getElementById("mega-journal-edit-protein")?.value || 0);
+  const carbs = Number(document.getElementById("mega-journal-edit-carbs")?.value || 0);
+  const fat = Number(document.getElementById("mega-journal-edit-fat")?.value || 0);
+
+  if (!Number.isFinite(calories) || calories <= 0 || [protein, carbs, fat].some((value) => !Number.isFinite(value) || value < 0)) {
+    message.textContent = "⚠️ Vérifie les calories et les macros.";
+    return;
+  }
+
+  const changes = {
+    nom: name,
+    calories,
+    proteines: protein,
+    glucides: carbs,
+    lipides: fat,
+    repasSlot: document.getElementById("mega-journal-edit-meal")?.value || "Déjeuner",
+  };
+
+  if (source === "aliment" && Number.isFinite(quantity) && quantity > 0) {
+    changes.portions = quantity / 100;
+    changes.nom = `${name.replace(/\\s*\\([0-9]+(?:[.,][0-9]+)?\\s*g\\)\\s*$/i, "").trim()} (${String(Math.round(quantity * 10) / 10).replace(".", ",")} g)`;
+  } else if (source === "recette" && Number.isFinite(quantity) && quantity > 0) {
+    changes.portions = quantity;
+  }
+
+  if (!modifierEntreeJournal(megaJournalEditState.id, changes)) {
+    message.textContent = "⚠️ Impossible de modifier cet ajout.";
+    return;
+  }
+
+  message.textContent = "✅ Journal corrigé.";
+  if (typeof w2Haptic === "function") w2Haptic(20);
+  setTimeout(() => megaCloseOverlay(document.getElementById("mega-journal-edit-overlay")), 220);
+}
+
+window.megaOpenJournalEditor = megaOpenJournalEditor;
+
+// ======================================================
 // PORTIONS + SMART DETAIL
 // ======================================================
 
