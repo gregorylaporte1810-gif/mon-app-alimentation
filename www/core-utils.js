@@ -75,9 +75,17 @@ window.WellnessCore = (() => {
   }
 
   function weightForecast(history, target, goalMode = "maintain") {
-    const clean = (history || [])
-      .map((e) => ({ date: new Date(e.date + "T12:00:00"), weight: Number(e.weight) }))
-      .filter((e) => !Number.isNaN(e.date.getTime()) && Number.isFinite(e.weight))
+    const latestByDay = new Map();
+    (history || []).forEach((e, index) => {
+      const date = new Date(`${e?.date || ""}T12:00:00`);
+      const weight = Number(e?.weight);
+      if (Number.isNaN(date.getTime()) || !Number.isFinite(weight)) return;
+      const createdAt = Date.parse(e?.createdAt || "");
+      const order = Number.isFinite(createdAt) ? createdAt : date.getTime() + index;
+      const previous = latestByDay.get(e.date);
+      if (!previous || order >= previous.order) latestByDay.set(e.date, { date, weight, order });
+    });
+    const clean = [...latestByDay.values()]
       .sort((a, b) => a.date - b.date)
       .slice(-14);
     const targetWeight = Number(target);

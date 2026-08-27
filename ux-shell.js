@@ -307,7 +307,7 @@
       </section>
 
       <section class="px-weight-chart-card px-card">
-        <div class="px-chart-head"><div><h2>Évolution du poids</h2><p><strong id="px-chart-delta">--</strong> <span>vs la semaine dernière</span></p></div><button type="button" class="px-range-pill" data-open-feature="weight">7 jours⌄</button></div>
+        <div class="px-chart-head"><div><h2>Évolution du poids</h2><p><strong id="px-chart-delta">--</strong> <span id="px-chart-delta-label">sur les 7 derniers jours</span></p></div><button type="button" class="px-range-pill" data-open-feature="weight">7 jours⌄</button></div>
         <div id="px-weight-chart-clone" class="px-weight-chart"></div>
       </section>
 
@@ -695,19 +695,45 @@
       }
     } catch {}
 
-    const weights = (account.weightHistory || []).slice(-7);
+    const weights = (account.weightHistory || [])
+      .map((entry, index) => ({ entry, index }))
+      .sort((a, b) => {
+        const aStamp = Date.parse(a.entry?.createdAt || "");
+        const bStamp = Date.parse(b.entry?.createdAt || "");
+        const aDay = Date.parse(`${a.entry?.date || ""}T12:00:00`);
+        const bDay = Date.parse(`${b.entry?.date || ""}T12:00:00`);
+        const av = Number.isFinite(aStamp) ? aStamp : (Number.isFinite(aDay) ? aDay : 0) + a.index;
+        const bv = Number.isFinite(bStamp) ? bStamp : (Number.isFinite(bDay) ? bDay : 0) + b.index;
+        return av - bv;
+      })
+      .map(({ entry }) => entry)
+      .slice(-7);
     if (weights.length) {
-      const first = Number(weights[0].weight) || 0;
       const last = Number(weights.at(-1).weight) || 0;
-      const delta = Math.round((last - first) * 10) / 10;
-      setText("px-weight-main", weights.length > 1 ? `${String(first).replace(".", ",")} → ${String(last).replace(".", ",")} kg` : `${String(last).replace(".", ",")} kg`);
-      setText("px-weight-delta", `${delta > 0 ? "+" : ""}${String(delta).replace(".", ",")} kg`);
-      setText("px-chart-delta", `${delta > 0 ? "+" : ""}${String(delta).replace(".", ",")} kg`);
-      byId("px-weight-delta")?.classList.toggle("negative", delta > 0);
+      const previous = weights.length > 1 ? Number(weights.at(-2).weight) || 0 : null;
+      const latestDelta = previous === null ? null : Math.round((last - previous) * 10) / 10;
+      setText("px-weight-main", previous !== null ? `${String(previous).replace(".", ",")} → ${String(last).replace(".", ",")} kg` : `${String(last).replace(".", ",")} kg`);
+      setText("px-weight-delta", latestDelta === null ? "Première mesure" : `${latestDelta > 0 ? "+" : ""}${String(latestDelta).replace(".", ",")} kg`);
+      byId("px-weight-delta")?.classList.toggle("negative", latestDelta !== null && latestDelta > 0);
+
+      const distinctDays = new Set(weights.map((entry) => entry.date)).size;
+      if (weights.length === 1) {
+        setText("px-chart-delta", "--");
+        setText("px-chart-delta-label", "première mesure");
+      } else if (distinctDays === 1) {
+        setText("px-chart-delta", `${latestDelta > 0 ? "+" : ""}${String(latestDelta).replace(".", ",")} kg`);
+        setText("px-chart-delta-label", "dernière variation");
+      } else {
+        const first = Number(weights[0].weight) || 0;
+        const periodDelta = Math.round((last - first) * 10) / 10;
+        setText("px-chart-delta", `${periodDelta > 0 ? "+" : ""}${String(periodDelta).replace(".", ",")} kg`);
+        setText("px-chart-delta-label", "sur les 7 derniers jours");
+      }
     } else {
       setText("px-weight-main", "--");
       setText("px-weight-delta", "Ajoute une pesée");
       setText("px-chart-delta", "--");
+      setText("px-chart-delta-label", "aucune donnée");
     }
 
     if (period) {
@@ -732,7 +758,19 @@
   function renderWeightChart(account) {
     const target = byId("px-weight-chart-clone");
     if (!target) return;
-    const data = (account.weightHistory || []).slice(-7);
+    const data = (account.weightHistory || [])
+      .map((entry, index) => ({ entry, index }))
+      .sort((a, b) => {
+        const aStamp = Date.parse(a.entry?.createdAt || "");
+        const bStamp = Date.parse(b.entry?.createdAt || "");
+        const aDay = Date.parse(`${a.entry?.date || ""}T12:00:00`);
+        const bDay = Date.parse(`${b.entry?.date || ""}T12:00:00`);
+        const av = Number.isFinite(aStamp) ? aStamp : (Number.isFinite(aDay) ? aDay : 0) + a.index;
+        const bv = Number.isFinite(bStamp) ? bStamp : (Number.isFinite(bDay) ? bDay : 0) + b.index;
+        return av - bv;
+      })
+      .map(({ entry }) => entry)
+      .slice(-7);
     if (!data.length) {
       target.innerHTML = '<div class="px-chart-empty">Ajoute des pesées pour voir ta courbe.</div>';
       return;
@@ -749,9 +787,14 @@
     }));
     const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
     const fill = `7,88 ${polyline} 93,88`;
+    const duplicateDays = new Set(data.filter((entry, index, all) => all.some((other, otherIndex) => otherIndex !== index && other.date === entry.date)).map((entry) => entry.date));
     const dayNames = data.map((entry) => {
       const d = new Date(`${entry.date}T12:00:00`);
-      return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("fr-FR", { weekday: "short" }).format(d).replace(".", "");
+      if (Number.isNaN(d.getTime())) return "";
+      const day = new Intl.DateTimeFormat("fr-FR", { weekday: "short" }).format(d).replace(".", "");
+      if (!duplicateDays.has(entry.date) || !entry.createdAt) return day;
+      const time = new Date(entry.createdAt);
+      return Number.isNaN(time.getTime()) ? day : `${day} ${time.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
     });
     target.innerHTML = `
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Évolution du poids">

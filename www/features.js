@@ -516,14 +516,29 @@ document.getElementById("mega-save-distribution")?.addEventListener("click", () 
 // WEIGHT & MEASUREMENTS
 // ======================================================
 
+function megaWeightSortValue(entry, fallbackIndex = 0) {
+  const createdAt = Date.parse(entry?.createdAt || "");
+  if (Number.isFinite(createdAt)) return createdAt;
+  const day = Date.parse(`${entry?.date || ""}T12:00:00`);
+  return (Number.isFinite(day) ? day : 0) + fallbackIndex;
+}
+
 function megaAddWeight(value) {
   const weight = Number(value);
   if (!Number.isFinite(weight) || weight < 20 || weight > 400) return false;
   const account = megaNormalizeAccount();
+  const now = new Date();
   const date = megaToday();
-  const existing = account.weightHistory.find((e) => e.date === date);
-  if (existing) existing.weight = weight; else account.weightHistory.push({ date, weight });
-  account.weightHistory.sort((a, b) => a.date.localeCompare(b.date));
+  account.weightHistory.push({
+    id: `weight-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    date,
+    weight,
+    createdAt: now.toISOString(),
+  });
+  account.weightHistory = account.weightHistory
+    .map((entry, index) => ({ entry, index }))
+    .sort((a, b) => megaWeightSortValue(a.entry, a.index) - megaWeightSortValue(b.entry, b.index))
+    .map(({ entry }) => entry);
   account.poidsActuel = weight;
   megaCalculateMacroTargets(account);
   sauvegarderEtatApplication();
@@ -537,7 +552,11 @@ document.getElementById("mega-add-weight")?.addEventListener("click", () => {
 
 function megaRenderWeight() {
   const account = megaNormalizeAccount();
-  const history = account.weightHistory.slice(-16);
+  const history = account.weightHistory
+    .map((entry, index) => ({ entry, index }))
+    .sort((a, b) => megaWeightSortValue(a.entry, a.index) - megaWeightSortValue(b.entry, b.index))
+    .map(({ entry }) => entry)
+    .slice(-16);
   const summary = document.getElementById("mega-weight-summary");
   const chart = document.getElementById("mega-weight-chart");
   const trend = document.getElementById("mega-weight-trend");
@@ -564,7 +583,7 @@ function megaRenderWeight() {
     return { x, y, ...e };
   });
   const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
-  chart.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Courbe de poids"><defs><linearGradient id="megaWeightGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#60a5fa" stop-opacity=".28"/><stop offset="1" stop-color="#60a5fa" stop-opacity="0"/></linearGradient></defs><polyline points="${polyline}" fill="none" stroke="#60a5fa" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="1.7" fill="#a7ccff" vector-effect="non-scaling-stroke"><title>${p.date} : ${p.weight} kg</title></circle>`).join("")}</svg>`;
+  chart.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Courbe de poids"><defs><linearGradient id="megaWeightGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#60a5fa" stop-opacity=".28"/><stop offset="1" stop-color="#60a5fa" stop-opacity="0"/></linearGradient></defs><polyline points="${polyline}" fill="none" stroke="#60a5fa" stroke-width="1.5" vector-effect="non-scaling-stroke"/>${points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="1.7" fill="#a7ccff" vector-effect="non-scaling-stroke"><title>${p.date}${p.createdAt ? ` ${new Date(p.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : ""} : ${p.weight} kg</title></circle>`).join("")}</svg>`;
 }
 
 document.getElementById("mega-save-measurements")?.addEventListener("click", () => {
