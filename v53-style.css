@@ -1,0 +1,132 @@
+
+/* ======================================================
+   WELLNESS V5.3 — USABILITY + IPHONE COMPATIBILITY
+====================================================== */
+
+/* ------------------------------------------------------
+   Self-heal when iOS renders the page with an abnormally
+   wide layout viewport (page zoom / desktop-like viewport).
+   Normal iPhones are untouched.
+------------------------------------------------------ */
+html.v53-mobile-viewport-repair {
+  overflow-x: hidden !important;
+}
+
+html.v53-mobile-viewport-repair body {
+  width: var(--v53-device-width) !important;
+  min-width: var(--v53-device-width) !important;
+  max-width: var(--v53-device-width) !important;
+  zoom: var(--v53-mobile-scale);
+  overflow-x: hidden !important;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.v53-mobile-viewport-repair .app,
+html.v53-mobile-viewport-repair .page,
+html.v53-mobile-viewport-repair .px-screen {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+html.v53-mobile-viewport-repair .px-stat-grid {
+  grid-template-columns: 1fr 1fr !important;
+}
+
+html.v53-mobile-viewport-repair .navigation-principale {
+  left: 12px !important;
+  right: auto !important;
+  width: calc(var(--v53-device-width) - 24px) !important;
+  max-width: none !important;
+}
+
+html.v53-mobile-viewport-repair .w2-fab,
+html.v53-mobile-viewport-repair .v52-fab,
+html.v53-mobile-viewport-repair .fab,
+html.v53-mobile-viewport-repair .px-fab,
+html.v53-mobile-viewport-repair [data-fab] {
+  left: calc(var(--v53-device-width) - 68px) !important;
+  right: auto !important;
+}
+
+html.v53-mobile-viewport-repair .modal-simple-overlay {
+  left: 0 !important;
+  right: auto !important;
+  width: var(--v53-device-width) !important;
+  max-width: var(--v53-device-width) !important;
+}
+
+html.v53-mobile-viewport-repair .v51-search-modal,
+html.v53-mobile-viewport-repair .modal-simple {
+  max-width: calc(var(--v53-device-width) - 18px) !important;
+}
+
+html.v53-mobile-viewport-repair .px-header h1 {
+  font-size: clamp(2rem, 9vw, 2.7rem) !important;
+}
+
+/* ------------------------------------------------------
+   Steps editor
+------------------------------------------------------ */
+.v53-steps-sheet {
+  max-width: 520px;
+}
+
+.v53-steps-help {
+  margin: 0 0 14px;
+  color: #91a4bf;
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+#v53-steps-total {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 6px;
+  font-size: 1.12rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.v53-step-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.v53-step-shortcuts button {
+  width: 100% !important;
+  min-height: 42px;
+  margin: 0 !important;
+  padding: 8px 5px !important;
+  border-radius: 11px !important;
+  background: rgba(59,130,246,.08) !important;
+  border: 1px solid rgba(96,165,250,.12) !important;
+  color: #bfd4f5 !important;
+  font-size: .66rem !important;
+}
+
+/* ------------------------------------------------------
+   Liquids
+------------------------------------------------------ */
+#w2-portion-unit {
+  min-width: 86px;
+}
+
+#w2-portion-unit option {
+  font-variant-numeric: tabular-nums;
+}
+
+.v42-unit-select {
+  font-weight: 750;
+}
+
+/* ------------------------------------------------------
+   Smaller screens
+------------------------------------------------------ */
+@media (max-width: 430px) {
+  .v53-step-shortcuts {
+    grid-template-columns: 1fr 1fr;
+  }
+}

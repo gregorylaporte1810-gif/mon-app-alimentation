@@ -31,6 +31,9 @@ on:
       - "polish-v51.js"
       - "final-v52-core.js"
       - "final-v52.js"
+      - "viewport-v53.js"
+      - "ux-v53-core.js"
+      - "ux-v53.js"
       - "manifest.webmanifest"
       - "sw.js"
       - "icons/**"
@@ -45,6 +48,7 @@ on:
       - "scripts/test-polish-v51.mjs"
       - "scripts/test-final-v52.mjs"
       - "scripts/test-v521-micro.mjs"
+      - "scripts/test-v53.mjs"
       - "scripts/import-ciqual-2025.mjs"
       - "scripts/normalize-v41.mjs"
       - ".github/workflows/ota-web-update.yml"
@@ -83,7 +87,7 @@ jobs:
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="5.2.1-${GITHUB_SHA::12}"
+          VERSION="5.3.0-${GITHUB_SHA::12}"
           rm -rf /tmp/wellness-ota
           mkdir -p /tmp/wellness-ota
           (
@@ -94,7 +98,7 @@ jobs:
           cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
-            "appVersion": "5.2.1",
+            "appVersion": "5.3.0",
             "schemaVersion": 4,
             "sourceCommit": "${GITHUB_SHA}",
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",

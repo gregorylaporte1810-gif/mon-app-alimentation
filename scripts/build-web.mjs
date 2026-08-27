@@ -43,6 +43,9 @@ const files = [
   "polish-v51.js",
   "final-v52-core.js",
   "final-v52.js",
+  "viewport-v53.js",
+  "ux-v53-core.js",
+  "ux-v53.js",
   "manifest.webmanifest",
   "sw.js",
 ];

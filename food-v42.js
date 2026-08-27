@@ -213,10 +213,10 @@
     if (!select || !food) return;
 
     const current = select.value;
-    const labels = { g: "g", kg: "kg", ml: "ml", cl: "cl", l: "L", unit: "unité" };
+    const labels = { g: "g", kg: "kg", ml: "mL", cl: "cL", l: "L", unit: "unité" };
     const units = U.allowedUnits(food);
     select.innerHTML = units.map((unit) => `<option value="${unit}">${labels[unit]}</option>`).join("");
-    select.value = units.includes(current) ? current : (food.liquid ? "ml" : "g");
+    select.value = units.includes(current) ? current : (U.inferLiquid(food) ? "ml" : "g");
 
     const pieceRow = document.getElementById("w2-piece-weight-row");
     const pieceInput = document.getElementById("w2-piece-weight");
@@ -248,9 +248,9 @@
       ensurePortionUnitUi();
       document.getElementById("w2-portion-title").textContent = food.name;
       const input = document.getElementById("w2-portion-grams");
-      if (input) input.value = food.liquid ? "250" : "100";
+      if (input) input.value = U.inferLiquid(food) ? "250" : "100";
       const unit = document.getElementById("w2-portion-unit");
-      if (unit) unit.value = food.liquid ? "ml" : "g";
+      if (unit) unit.value = U.inferLiquid(food) ? "ml" : "g";
       const piece = document.getElementById("w2-piece-weight");
       if (piece) piece.value = U.inferPieceWeight(food) || "";
       renderUnitChoices();
@@ -317,6 +317,11 @@
       }
 
       megaCloseOverlay(document.getElementById("w2-portion-overlay"));
+      ["w2-food-overlay", "w2-barcode-overlay"].forEach((id) => {
+        const parentOverlay = document.getElementById(id);
+        if (parentOverlay) megaCloseOverlay(parentOverlay);
+      });
+      document.activeElement?.blur?.();
       w2AwardXpOnce(`food|${w2Today()}|${Date.now()}`, 2);
       rafraichirApplication();
       w2Haptic(25);

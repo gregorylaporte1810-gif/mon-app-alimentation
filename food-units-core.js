@@ -36,9 +36,11 @@
   }
 
   function inferLiquid(food = {}) {
-    if (typeof food.liquid === "boolean") return food.liquid;
-    const text = normalizeText(`${food.name || ""} ${food.category || ""} ${food.subcategory || ""}`);
-    return /boisson|eau|mineral|jus|nectar|smoothie|soda|cola|limonade|lait|cafe|the|infusion|vin|biere|cidre|alcool|spiritueux|soupe|potage|bouillon|huile|sirop/.test(text);
+    if (food.basisUnit === "ml") return true;
+    if (food.liquid === true) return true;
+
+    const text = normalizeText(`${food.name || ""} ${food.category || ""} ${food.subcategory || ""} ${food.brand || ""}`);
+    return /(^| )(boisson|eau|jus|nectar|smoothie|soda|cola|limonade|lait|cafe|the|infusion|tisane|vin|biere|cidre|alcool|spiritueux|cocktail|soupe|potage|bouillon|huile|sirop|vinaigre|sauce|kefir|kombucha|shake|milkshake|boisson vegetale|boisson lactee|boisson energetique|boisson sportive|yaourt a boire|creme liquide|lait de coco|a boire)( |$)/.test(text);
   }
 
   function inferPieceWeight(food = {}) {
@@ -64,10 +66,10 @@
   }
 
   function allowedUnits(food = {}) {
-    const units = ["g", "kg"];
-    if (inferLiquid(food)) units.push("ml", "cl", "l");
-    units.push("unit");
-    return units;
+    if (inferLiquid(food)) {
+      return ["ml", "cl", "l", "g", "kg", "unit"];
+    }
+    return ["g", "kg", "unit"];
   }
 
   function toReferenceAmount(value, unit, food = {}, customPieceWeight = null) {
