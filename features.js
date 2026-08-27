@@ -349,9 +349,15 @@ function megaEnsureJournalEditor() {
   return overlay;
 }
 
+// WELLNESS V4.1.2 JOURNAL QUANTITY NAME FIX
 function megaJournalBaseName(entry) {
-  if (entry?.source !== "aliment") return String(entry?.nom || "Ajout manuel");
-  return String(entry.nom || "Aliment").replace(/\\s*\\([0-9]+(?:[.,][0-9]+)?\\s*g\\)\\s*$/i, "").trim();
+  if (entry?.source !== "aliment") {
+    return String(entry?.nom || "Ajout manuel");
+  }
+
+  return String(entry.nom || "Aliment")
+    .replace(/(?:\s*\([0-9]+(?:[.,][0-9]+)?\s*g\))+\s*$/i, "")
+    .trim();
 }
 
 function megaScaleJournalEditFromQuantity() {
