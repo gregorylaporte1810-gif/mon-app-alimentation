@@ -1,10 +1,10 @@
 {
   "name": "wellness-2-pro",
-  "version": "5.3.2",
+  "version": "5.3.3",
   "private": true,
-  "description": "Wellness 5.3.2 - automatic barcode-to-portion flow",
+  "description": "Wellness 5.3.3 - native barcode scanner closes before quantity",
   "scripts": {
-    "test": "node scripts/test-core.mjs && npm run test:food && npm run test:daily && npm run test:smart && npm run test:polish && npm run test:final && npm run test:micro && npm run test:usability && npm run test:barcode-flow",
+    "test": "node scripts/test-core.mjs && npm run test:food && npm run test:daily && npm run test:smart && npm run test:polish && npm run test:final && npm run test:micro && npm run test:usability && npm run test:barcode-flow && npm run test:barcode-autoclose",
     "check:syntax": "node --check app.js && node --check features.js && node --check wellness2.js && node --check ux-shell.js && node --check core-utils.js && node --check cloud.js && node --check ota-updater.js && node --check native-bridge.js && node --check hardening-core.js && node --check hardening.js && node --check food-units-core.js && node --check food-v42.js && node --check data-foods-ciqual.js && node --check daily-ux-core-v43.js && node --check daily-ux-v43.js && node --check smart-v44-core.js && node --check smart-v44.js && node --check health-v5.js && node --check health-v501-guard.js && node --check polish-v51-core.js && node --check polish-v51.js && node --check final-v52-core.js && node --check final-v52.js && node --check viewport-v53.js && node --check ux-v53-core.js && node --check ux-v53.js && node --check barcode-v532.js",
     "harden:source": "node scripts/normalize-v41.mjs",
     "build:web": "node scripts/build-web.mjs",
@@ -21,7 +21,8 @@
     "test:final": "node scripts/test-final-v52.mjs",
     "test:micro": "node scripts/test-v521-micro.mjs",
     "test:usability": "node scripts/test-v53.mjs",
-    "test:barcode-flow": "node scripts/test-v532-barcode.mjs"
+    "test:barcode-flow": "node scripts/test-v532-barcode.mjs",
+    "test:barcode-autoclose": "node scripts/test-v533-barcode.mjs"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "8.0.0",

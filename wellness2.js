@@ -6,7 +6,7 @@
 // prévisions, préférences, cloud, backup et quick-add.
 // ======================================================
 
-const W2_VERSION = "5.3.2";
+const W2_VERSION = "5.3.3";
 const W2_CORE = window.WellnessCore;
 const W2_FOODS = window.WELLNESS_FOODS || [];
 let w2SelectedFood = null;
@@ -231,12 +231,12 @@ document.querySelectorAll("[data-grams]").forEach(btn=>btn.addEventListener("cli
 async function w2LookupBarcode(code) {
   const value=String(code||"").trim();
   const result=document.getElementById("w2-barcode-result");
-  if(!value){result.innerHTML='<p class="mega-inline-message">Saisis un code-barres.</p>';return;}
+  if(!value){result.innerHTML='<p class="mega-inline-message">Saisis un code-barres.</p>';return false;}
   result.innerHTML='<p class="mega-help">Recherche du produit…</p>';
   try {
     const response=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(value)}.json?fields=product_name,nutriments,serving_size,brands`);
     const data=await response.json();
-    if(!data?.product){result.innerHTML='<p class="mega-inline-message">Produit non trouvé dans Open Food Facts.</p>';return;}
+    if(!data?.product){result.innerHTML='<p class="mega-inline-message">Produit non trouvé dans Open Food Facts.</p>';return false;}
     const p=data.product, n=p.nutriments||{};
     const food={ id:`off-${value}`, name:p.product_name||`Produit ${value}`, category:p.brands||"Open Food Facts", kcal:Number(n["energy-kcal_100g"])||0, protein:Number(n.proteins_100g)||0, carbs:Number(n.carbohydrates_100g)||0, fat:Number(n.fat_100g)||0, fiber:Number(n.fiber_100g)||0, source:"Open Food Facts" };
     result.innerHTML=`<p class="mega-help">✅ Produit trouvé : ${w2Escape(food.name)}. Ouverture de la quantité…</p>`;
@@ -252,7 +252,11 @@ async function w2LookupBarcode(code) {
       megaCloseOverlay(document.getElementById("w2-barcode-overlay"));
       setTimeout(() => w2OpenPortion(food), 40);
     }
-  } catch(err) { result.innerHTML=`<p class="mega-inline-message">Impossible d'interroger la base en ligne. Vérifie ta connexion. (${w2Escape(err.message)})</p>`; }
+    return true;
+  } catch(err) {
+    result.innerHTML=`<p class="mega-inline-message">Impossible d'interroger la base en ligne. Vérifie ta connexion. (${w2Escape(err.message)})</p>`;
+    return false;
+  }
 }
 async function w2StartBarcodeCamera() {
   const help=document.getElementById("w2-barcode-help"), video=document.getElementById("w2-barcode-video");

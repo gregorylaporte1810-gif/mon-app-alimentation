@@ -382,15 +382,22 @@
           const input = document.getElementById("w2-barcode-input");
           if (input) input.value = value;
 
-          const webOverlay = document.getElementById("w2-barcode-overlay");
-          if (webOverlay) {
-            webOverlay.classList.add("ouverte");
-            webOverlay.setAttribute("aria-hidden", "false");
-            document.body.classList.add("modal-ouverte");
-          }
-
+          // V5.3.3 : on ne rouvre surtout pas la fenêtre code-barres ici.
+          // La recherche se fait pendant qu'elle reste fermée.
+          // Si le produit existe, w2LookupBarcode ouvre directement Quantité.
           setMessage("w2-barcode-help", `Code détecté : ${value}. Recherche du produit…`);
-          await w2LookupBarcode(value);
+          const found = await w2LookupBarcode(value);
+
+          // Seulement en cas de produit inconnu / erreur réseau,
+          // on rouvre la fenêtre pour permettre une saisie manuelle.
+          if (found !== true) {
+            const webOverlay = document.getElementById("w2-barcode-overlay");
+            if (webOverlay) {
+              webOverlay.classList.add("ouverte");
+              webOverlay.setAttribute("aria-hidden", "false");
+              document.body.classList.add("modal-ouverte");
+            }
+          }
         }
       );
       nativeScannerHandles.push(scannedHandle);
