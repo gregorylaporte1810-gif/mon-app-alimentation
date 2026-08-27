@@ -1,4 +1,4 @@
-const CACHE = "wellness-5.3.1";
+const CACHE = "wellness-5.3.2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,6 +29,7 @@ const ASSETS = [
   "./viewport-v53.js",
   "./ux-v53-core.js",
   "./ux-v53.js",
+  "./barcode-v532.js",
   "./ota-updater.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",

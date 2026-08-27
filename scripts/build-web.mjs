@@ -46,6 +46,7 @@ const files = [
   "viewport-v53.js",
   "ux-v53-core.js",
   "ux-v53.js",
+  "barcode-v532.js",
   "manifest.webmanifest",
   "sw.js",
 ];

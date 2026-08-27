@@ -6,7 +6,7 @@
 // prévisions, préférences, cloud, backup et quick-add.
 // ======================================================
 
-const W2_VERSION = "5.3.1";
+const W2_VERSION = "5.3.2";
 const W2_CORE = window.WellnessCore;
 const W2_FOODS = window.WELLNESS_FOODS || [];
 let w2SelectedFood = null;
@@ -239,9 +239,19 @@ async function w2LookupBarcode(code) {
     if(!data?.product){result.innerHTML='<p class="mega-inline-message">Produit non trouvé dans Open Food Facts.</p>';return;}
     const p=data.product, n=p.nutriments||{};
     const food={ id:`off-${value}`, name:p.product_name||`Produit ${value}`, category:p.brands||"Open Food Facts", kcal:Number(n["energy-kcal_100g"])||0, protein:Number(n.proteins_100g)||0, carbs:Number(n.carbohydrates_100g)||0, fat:Number(n.fat_100g)||0, fiber:Number(n.fiber_100g)||0, source:"Open Food Facts" };
-    result.innerHTML=`<div class="w2-barcode-product"><h3>${w2Escape(food.name)}</h3><p>${w2Escape(food.category)} · ${Math.round(food.kcal)} kcal / 100 g · P ${W2_CORE.round1(food.protein)} · G ${W2_CORE.round1(food.carbs)} · L ${W2_CORE.round1(food.fat)}</p><button id="w2-add-barcode-product">Choisir la portion</button></div>`;
-    document.getElementById("w2-add-barcode-product").addEventListener("click",()=>{w2OpenPortion(food);w2StopBarcodeCamera();});
-    w2AwardXpOnce(`barcode|${w2Today()}|${value}`,4); w2Haptic(25);
+    result.innerHTML=`<p class="mega-help">✅ Produit trouvé : ${w2Escape(food.name)}. Ouverture de la quantité…</p>`;
+    w2AwardXpOnce(`barcode|${w2Today()}|${value}`,4);
+    w2Haptic(25);
+
+    // V5.3.2 : plus besoin de toucher "Choisir la quantité".
+    // Le scanner se ferme et la fenêtre de portion s'ouvre immédiatement.
+    if (window.WellnessBarcodeFlowV532?.closeBarcodeThenOpenPortion) {
+      window.WellnessBarcodeFlowV532.closeBarcodeThenOpenPortion(food);
+    } else {
+      w2StopBarcodeCamera();
+      megaCloseOverlay(document.getElementById("w2-barcode-overlay"));
+      setTimeout(() => w2OpenPortion(food), 40);
+    }
   } catch(err) { result.innerHTML=`<p class="mega-inline-message">Impossible d'interroger la base en ligne. Vérifie ta connexion. (${w2Escape(err.message)})</p>`; }
 }
 async function w2StartBarcodeCamera() {
