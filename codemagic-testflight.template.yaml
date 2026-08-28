@@ -15,8 +15,8 @@ workflows:
       app_store_connect: YOUR_CODEMAGIC_INTEGRATION
 
     environment:
-      node: 22
-      xcode: latest
+      node: v22.11.0
+      xcode: 26.4
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.gregorylaporte1810.wellness
@@ -25,17 +25,25 @@ workflows:
         XCODE_SCHEME: App
 
     scripts:
-      - name: Install npm dependencies
-        script: npm install
+      - name: Install exact npm dependencies
+        script: npm ci
 
-      - name: Build web assets
-        script: npm run build:web
+      - name: Verify project
+        script: npm run verify:ci
 
-      - name: Create Capacitor iOS project
+      - name: Create and configure Capacitor iOS project
         script: |
           rm -rf ios
-          npx cap add ios
-          npx cap sync ios
+          node node_modules/@capacitor/cli/bin/capacitor add ios --packagemanager CocoaPods
+          node node_modules/@capacitor/cli/bin/capacitor sync ios
+          node scripts/configure-ios-native.mjs
+          cd ios/App
+          pod install --repo-update
+          cd ../..
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :NSHealthShareUsageDescription" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :NSHealthUpdateUsageDescription" ios/App/App/Info.plist
+          grep -q "com.apple.developer.healthkit" ios/App/App/App.entitlements
 
       - name: Apply Apple signing profiles
         script: |
