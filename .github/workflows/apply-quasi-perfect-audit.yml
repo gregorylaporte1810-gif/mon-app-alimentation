@@ -52,11 +52,16 @@ jobs:
       - name: Commit verified changes
         run: |
           set -euo pipefail
+          # The GitHub Actions token cannot update workflow files. Restore only
+          # those two generated workflow edits here; they are applied directly
+          # through the authorized GitHub integration after this verified push.
+          git checkout HEAD -- .github/workflows/quality.yml .github/workflows/ota-web-update.yml
           rm -f scripts/apply-quasi-perfect-audit.mjs
           rm -f scripts/apply-quasi-perfect-audit.py
           rm -f scripts/fix-html-validation.py
           rm -f scripts/fix-accessibility-runtime.py
           rm -f .github/workflows/apply-quasi-perfect-audit.yml
+          rm -rf test-results playwright-report
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
