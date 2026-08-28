@@ -38,6 +38,7 @@ on:
       - "barcode-v532.js"
       - "barcode-v534.js"
       - "layout-v541.js"
+      - "legal.js"
       - "manifest.webmanifest"
       - "sw.js"
       - "icons/**"
@@ -59,6 +60,7 @@ on:
       - "scripts/test-v535-steps-keyboard.mjs"
       - "scripts/test-v54-maintenance.mjs"
       - "scripts/test-v541-layout.mjs"
+      - "scripts/test-quality-standards.mjs"
       - "scripts/import-ciqual-2025.mjs"
       - "scripts/normalize-v41.mjs"
       - ".github/workflows/ota-web-update.yml"
@@ -74,14 +76,20 @@ concurrency:
 jobs:
   publish:
     name: Verify and publish dedicated OTA channel
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
 
     steps:
       - name: Checkout main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22.23.2
+          package-manager-cache: false
 
       - name: Verify Node.js runtime
         run: node --version && npm --version

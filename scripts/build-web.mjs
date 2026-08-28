@@ -45,6 +45,7 @@ const files = [
   "barcode-v532.js",
   "barcode-v534.js",
   "layout-v541.js",
+  "legal.js",
   "manifest.webmanifest",
   "sw.js",
 ];

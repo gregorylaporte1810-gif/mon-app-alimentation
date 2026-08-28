@@ -61,7 +61,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--text);
   background:
     radial-gradient(circle at 8% 0%, rgba(96, 165, 250, 0.11), transparent 28%),
@@ -6596,4 +6596,22 @@ html.v53-mobile-viewport-repair [data-fab] {
 .v44-adaptive-action button,
 .v5-health-actions button {
   min-height: 44px !important;
+}
+
+
+/* ======================================================
+   WELLNESS 5.6 — LEGAL + ACCESSIBILITY FINISH
+====================================================== */
+.w56-legal-card { margin-top: 18px; }
+.w56-legal-card h2 { margin-bottom: 8px; }
+.w56-legal-card p { margin-bottom: 10px; }
+.w56-legal-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.w56-legal-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; color: var(--text-soft); text-decoration: none; background: rgba(255,255,255,.035); }
+.w56-legal-links a:hover { border-color: rgba(96,165,250,.35); color: var(--text); }
+.w56-allergy-note { margin: 9px 0 0; padding: 10px 12px; border: 1px solid rgba(250,204,21,.18); border-radius: 12px; color: #d7c78b; background: rgba(250,204,21,.055); font-size: .76rem; line-height: 1.5; }
+html[data-theme="light"] .w56-allergy-note { color: #725d00; background: rgba(250,204,21,.10); }
+.navigation-principale .nav-bouton[aria-current="page"] { position: relative; }
+@media (max-width: 700px) {
+  .w56-legal-links { display: grid; grid-template-columns: 1fr; }
+  .w56-legal-links a { width: 100%; }
 }

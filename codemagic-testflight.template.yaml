@@ -15,7 +15,7 @@ workflows:
       app_store_connect: YOUR_CODEMAGIC_INTEGRATION
 
     environment:
-      node: v22.11.0
+      node: v22.23.2
       xcode: 26.4
       ios_signing:
         distribution_type: app_store
