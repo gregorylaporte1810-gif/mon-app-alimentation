@@ -1,5 +1,19 @@
 # Changelog
 
+## 5.6.0 — 2026-08-28
+
+- HTML validé et CSP resserrée ;
+- suppression de Google Fonts au profit des polices système ;
+- Open Food Facts migré vers API v3 avec timeout, gestion HTTP et identification client ;
+- politique de confidentialité, sources/licences et architecture documentées ;
+- avertissement allergènes et régions live d’accessibilité ;
+- navigation active exposée via `aria-current` ;
+- PWA et cache versionnés 5.6 ;
+- GitHub Actions reproductibles sur Ubuntu 24.04 + Node 22.23.2 ;
+- tests Playwright mobile/desktop et audit axe ajoutés ;
+- garde-fous de taille pour limiter la dette des gros modules historiques.
+
+
 Les changements détaillés restent disponibles dans l’historique Git. Ce fichier résume les étapes majeures encore utiles à la maintenance.
 
 ## 5.5.0 — audit professionnel final

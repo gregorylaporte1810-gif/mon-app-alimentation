@@ -1,5 +1,5 @@
 {
-  "name": "Wellness 5 - Nutrition, activité & bien-être",
+  "name": "Wellness 5.6 - Nutrition, activité & bien-être",
   "short_name": "Wellness",
   "description": "Suivi nutrition, activité, sommeil, poids, hydratation, planning et progression.",
   "start_url": "./index.html",
@@ -33,5 +33,13 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "id": "./",
+  "lang": "fr",
+  "dir": "ltr",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "prefer_related_applications": false
 }

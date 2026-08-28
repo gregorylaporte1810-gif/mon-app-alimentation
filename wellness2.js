@@ -6,7 +6,7 @@
 // prévisions, préférences, cloud, backup et quick-add.
 // ======================================================
 
-const W2_VERSION = "5.4.1";
+const W2_VERSION = "5.6.0";
 const W2_CORE = window.WellnessCore;
 const W2_FOODS = window.WELLNESS_FOODS || [];
 let w2SelectedFood = null;
@@ -369,6 +369,57 @@ document.querySelectorAll("[data-grams]").forEach((btn) =>
 // CODE-BARRES — BarcodeDetector + Open Food Facts
 // ======================================================
 
+const W2_OFF_API_BASE = "https://world.openfoodfacts.org/api/v3/product";
+const W2_OFF_TIMEOUT_MS = 10000;
+
+function w2OpenFoodFactsUrl(code) {
+  const url = new URL(`${W2_OFF_API_BASE}/${encodeURIComponent(code)}`);
+  url.searchParams.set("fields", "product_name,nutriments,serving_size,brands");
+  url.searchParams.set("lc", "fr");
+  url.searchParams.set("cc", "fr");
+  url.searchParams.set("app_name", "Wellness");
+  url.searchParams.set("app_version", W2_VERSION);
+  // WKWebView/browser fetch cannot reliably override the User-Agent header.
+  // Open Food Facts accepts an identification parameter when the header cannot be set.
+  url.searchParams.set(
+    "User-Agent",
+    `Wellness/${W2_VERSION} (https://github.com/gregorylaporte1810-gif/mon-app-alimentation)`,
+  );
+  return url.toString();
+}
+
+async function w2FetchOpenFoodFacts(code) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), W2_OFF_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(w2OpenFoodFactsUrl(code), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+      signal: controller.signal,
+    });
+
+    if (response.status === 404) return null;
+    if (response.status === 429) {
+      throw new Error("Open Food Facts limite temporairement les requêtes. Réessaie dans quelques instants.");
+    }
+    if (!response.ok) {
+      throw new Error(`Open Food Facts indisponible (HTTP ${response.status})`);
+    }
+    return response.json();
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Open Food Facts met trop de temps à répondre.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 async function w2LookupBarcode(code) {
   const value = String(code || "").trim();
   const result = document.getElementById("w2-barcode-result");
@@ -377,12 +428,14 @@ async function w2LookupBarcode(code) {
       '<p class="mega-inline-message">Saisis un code-barres.</p>';
     return false;
   }
+  if (!/^[A-Za-z0-9._-]{4,64}$/.test(value)) {
+    result.innerHTML =
+      '<p class="mega-inline-message">Code-barres invalide. Vérifie la valeur scannée ou saisie.</p>';
+    return false;
+  }
   result.innerHTML = '<p class="mega-help">Recherche du produit…</p>';
   try {
-    const response = await fetch(
-      `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(value)}.json?fields=product_name,nutriments,serving_size,brands`,
-    );
-    const data = await response.json();
+    const data = await w2FetchOpenFoodFacts(value);
     if (!data?.product) {
       result.innerHTML =
         '<p class="mega-inline-message">Produit non trouvé dans Open Food Facts.</p>';

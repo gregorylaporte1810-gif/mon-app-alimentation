@@ -2,7 +2,7 @@
 
 ## Version prise en charge
 
-La branche `main` et la dernière version 5.5.x publiée sont les versions maintenues.
+La branche `main` et la dernière version 5.6.x publiée sont les versions maintenues.
 
 Les anciennes branches, anciens installateurs et anciens bundles ne doivent pas être utilisés comme base de production.
 
@@ -35,3 +35,14 @@ Le signalement doit contenir uniquement les informations nécessaires pour repro
 Le bundle OTA est contrôlé par origine, version, schéma et SHA-256. Le manifeste publie également le commit source et la taille du bundle.
 
 Le SHA-256 n’est pas une signature cryptographique indépendante. Une compromission simultanée du canal de publication et du manifeste reste un risque résiduel ; une future signature asymétrique doit conserver sa clé privée hors du dépôt et hors de l’application cliente.
+
+
+## Protection du dépôt
+
+La configuration recommandée de `main` est : pull request obligatoire, Quality Gate requise, force-push et suppression interdits. Si ces règles ne sont pas disponibles via l’intégration utilisée, elles doivent être activées dans les paramètres GitHub du dépôt. La branche `ota` doit rester inscriptible uniquement par le workflow de publication prévu.
+
+## Risques résiduels assumés
+
+- les données applicatives ordinaires ne sont pas chiffrées de bout en bout par Wellness ; la protection de l’appareil reste importante ;
+- les sauvegardes JSON exportées ne sont pas chiffrées par mot de passe ;
+- le SHA-256 OTA protège l’intégrité déclarée, mais une signature asymétrique indépendante nécessite une clé privée gérée hors dépôt.

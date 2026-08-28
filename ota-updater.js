@@ -26,7 +26,7 @@
   const ACTIVE_VERSION_KEY = "wellnessOtaActiveVersion";
   const LAST_CHECK_KEY = "wellnessOtaLastCheck";
   const CHECK_INTERVAL_MS = 15 * 60 * 1000;
-  const BUNDLED_APP_VERSION = "5.5.0";
+  const BUNDLED_APP_VERSION = "5.6.0";
   const SUPPORTED_SCHEMA_VERSION = 4;
 
   function semverCore(value) {
@@ -102,7 +102,7 @@
         color: "#fff",
         border: "1px solid rgba(148, 163, 184, .25)",
         boxShadow: "0 18px 50px rgba(0,0,0,.35)",
-        font: "600 13px/1.45 Inter, system-ui, sans-serif",
+        font: "600 13px/1.45 system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         textAlign: "center",
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",

@@ -421,7 +421,7 @@ const messageCalculCalories = document.getElementById("message-calcul-calories")
 
 // Apparence
 const CLE_THEME = "wellnessTheme";
-const boutonsTheme = document.querySelectorAll("[data-theme-mode]");
+const boutonsTheme = document.querySelectorAll("button[data-theme-mode]");
 const themeEtat = document.getElementById("theme-etat");
 const messageTheme = document.getElementById("message-theme");
 const mediaThemeSombre = window.matchMedia("(prefers-color-scheme: dark)");

@@ -1,4 +1,4 @@
-# Wellness 5.5.0
+# Wellness 5.6.0
 
 Application de suivi personnel dédiée à la nutrition, l’hydratation, l’activité, le sommeil, le poids et l’organisation des repas.
 
@@ -69,7 +69,7 @@ En cas de problème de santé ou de besoin nutritionnel spécifique, les objecti
 
 ## Sécurité — V5.5.0
 
-La version 5.5.0 renforce notamment :
+La version 5.6.0 renforce notamment :
 
 - la protection des sessions et secrets ;
 - l’assainissement des sauvegardes et synchronisations ;
@@ -135,8 +135,8 @@ Un build lancé sur `main` vérifie maintenant que le commit sélectionné corre
 Les artefacts sont nommés avec la version et le SHA court, par exemple :
 
 ```text
-Wellness-5.5.0-68f0d2ccb8a3-unsigned.ipa
-Wellness-5.5.0-68f0d2ccb8a3-build.txt
+Wellness-5.6.0-<sha>-unsigned.ipa
+Wellness-5.6.0-<sha>-build.txt
 ```
 
 Avant installation, vérifie toujours que le SHA du nom de l’IPA correspond au commit attendu.
@@ -176,4 +176,21 @@ Les principales notes de version sont résumées dans `CHANGELOG.md`.
 
 ## Version
 
-**Wellness 5.5.0**
+**Wellness 5.6.0**
+
+
+## Qualité navigateur et accessibilité
+
+La Quality Gate exécute également des tests Playwright sur mobile et desktop Chromium, ainsi qu’un audit axe des violations d’accessibilité critiques ou sérieuses.
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+## Confidentialité, sources et licence
+
+- `PRIVACY.md` décrit les données et services utilisés ;
+- `THIRD_PARTY_NOTICES.md` documente notamment Ciqual 2025 et Open Food Facts ;
+- `LICENSE` précise les droits sur le code Wellness ;
+- `ARCHITECTURE.md` fixe la trajectoire de refactorisation et les règles de maintenance.
