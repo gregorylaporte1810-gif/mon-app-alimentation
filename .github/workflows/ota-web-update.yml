@@ -78,15 +78,12 @@ jobs:
 
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.11.0"
-          cache: npm
+      - name: Verify Node.js runtime
+        run: node --version && npm --version
 
       - name: Install exact dependencies
         run: npm ci
