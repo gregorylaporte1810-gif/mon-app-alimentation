@@ -1,0 +1,207 @@
+
+/* ======================================================
+   WELLNESS V5.4.1 — RESPONSIVE IPHONE + CONTENT SWAP
+====================================================== */
+
+/* Le document ne doit jamais devenir plus large que l'iPhone.
+   Les carrousels internes peuvent, eux, continuer à défiler. */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+body {
+  -webkit-text-size-adjust: 100%;
+}
+
+.app,
+.page,
+.px-screen {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.app,
+.page {
+  overflow-x: clip;
+}
+
+/* Neutralise l'ancien mode de réparation V5.3 s'il reste
+   momentanément présent pendant le remplacement du cache. */
+html.v53-mobile-viewport-repair body {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  zoom: 1 !important;
+}
+
+html.v53-mobile-viewport-repair .app,
+html.v53-mobile-viewport-repair .page,
+html.v53-mobile-viewport-repair .px-screen {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+html.v53-mobile-viewport-repair .navigation-principale {
+  left: 12px !important;
+  right: 12px !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+html.v53-mobile-viewport-repair .w2-fab,
+html.v53-mobile-viewport-repair .v52-fab,
+html.v53-mobile-viewport-repair .fab,
+html.v53-mobile-viewport-repair .px-fab,
+html.v53-mobile-viewport-repair [data-fab] {
+  left: auto !important;
+  right: 18px !important;
+}
+
+/* ---------------- Nutrition ---------------- */
+
+.v541-responsive-nutrition,
+.v541-responsive-nutrition > *,
+.v541-responsive-nutrition .px-card,
+.v541-responsive-nutrition .px-section-row,
+.v541-responsive-nutrition .px-macro-line,
+.v541-responsive-nutrition .px-journal-list,
+.v541-responsive-nutrition .px-journal-group {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.v541-responsive-nutrition > * {
+  width: 100%;
+}
+
+.v541-responsive-nutrition .px-search-bar {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.v541-responsive-nutrition .px-search-bar > span {
+  min-width: 0;
+}
+
+.v541-responsive-nutrition .px-search-bar > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.v541-responsive-nutrition [data-horizontal-scroll],
+.v541-responsive-nutrition .smart-filter-row,
+.v541-responsive-nutrition .w2-food-grid.compact {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.v541-responsive-nutrition img,
+.v541-responsive-nutrition video,
+.v541-responsive-nutrition canvas {
+  max-width: 100%;
+}
+
+/* La validation des repas est maintenant dans Nutrition. */
+.v541-meals-nutrition {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Le journal est maintenant dans Aujourd'hui. */
+.v541-journal-home {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.v541-responsive-home,
+.v541-responsive-home > *,
+.v541-responsive-home .px-journal-list,
+.v541-responsive-home .px-journal-group {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ---------------- iPhone ---------------- */
+
+@media (max-width: 520px) {
+  .app {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: max(14px, env(safe-area-inset-left)) !important;
+    padding-right: max(14px, env(safe-area-inset-right)) !important;
+  }
+
+  .px-screen {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .px-header {
+    min-width: 0 !important;
+  }
+
+  .px-header-copy {
+    min-width: 0 !important;
+  }
+
+  .px-header h1 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .v541-responsive-nutrition .px-summary-card,
+  .v541-responsive-nutrition .px-journal-card,
+  .v541-responsive-nutrition .px-meals-card {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .v541-responsive-nutrition .px-macro-line {
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) auto !important;
+    column-gap: 8px !important;
+  }
+
+  .v541-responsive-nutrition .px-macro-line > div {
+    min-width: 0;
+  }
+
+  .v541-responsive-nutrition .px-macro-line em {
+    white-space: nowrap;
+    font-size: .72rem;
+  }
+
+  .v541-responsive-nutrition .px-two-actions {
+    grid-template-columns: 1fr 1fr !important;
+    min-width: 0;
+  }
+
+  .v541-responsive-nutrition .px-two-actions > * {
+    min-width: 0;
+  }
+
+  .v541-journal-home .px-journal-group-head {
+    min-width: 0;
+  }
+
+  .v541-journal-home .px-journal-entry {
+    min-width: 0;
+  }
+}

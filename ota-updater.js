@@ -13,7 +13,7 @@
   const ACTIVE_VERSION_KEY = "wellnessOtaActiveVersion";
   const LAST_CHECK_KEY = "wellnessOtaLastCheck";
   const CHECK_INTERVAL_MS = 15 * 60 * 1000;
-  const BUNDLED_APP_VERSION = "5.4.0";
+  const BUNDLED_APP_VERSION = "5.4.1";
   const SUPPORTED_SCHEMA_VERSION = 4;
 
   function semverCore(value) {

@@ -3,12 +3,15 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover, shrink-to-fit=no">
   <meta name="theme-color" content="#0b1220">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' data: blob:; connect-src 'self' https://raw.githubusercontent.com https://world.openfoodfacts.org https://*.openfoodfacts.org https://*.supabase.co; worker-src 'self' blob:; manifest-src 'self';">
+  <meta name="referrer" content="no-referrer">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <meta name="description" content="Wellness 5.3.5 : nutrition, activité, sommeil, poids, coach et planification.">
+  <meta name="description" content="Wellness 5.4.1 : nutrition, activité, sommeil, poids, coach et planification.">
 
-  <title>Wellness 5.3.5</title>
+  <title>Wellness 5.4.1</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,21 +20,8 @@
     rel="stylesheet"
   >
 
-  <script>
-    (function () {
-      const cleTheme = "wellnessTheme";
-      const mode = localStorage.getItem(cleTheme) || "dark";
-      const systemeSombre = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const theme = mode === "system"
-        ? (systemeSombre ? "dark" : "light")
-        : mode;
-
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.dataset.themeMode = mode;
-    })();
-  </script>
-
-  <link rel="manifest" href="manifest.webmanifest">
+  <script src="theme-bootstrap.js"></script>
+<link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1514,10 +1504,10 @@
       </div>
 
       <div class="carte profil-carte w2-settings-center">
-        <div class="section-heading"><div><p class="sur-titre">Réglages</p><h2>⚙️ Centre de paramètres</h2></div><span class="mini-pill">Wellness 5.3.5</span></div>
+        <div class="section-heading"><div><p class="sur-titre">Réglages</p><h2>⚙️ Centre de paramètres</h2></div><span class="mini-pill">Wellness 5.4.1</span></div>
         <div class="w2-settings-grid">
           <div><label for="w2-units">Unité de poids</label><select id="w2-units"><option value="kg">Kilogrammes (kg)</option><option value="lb">Livres (lb)</option></select></div>
-          <div><label for="w2-language">Langue</label><select id="w2-language"><option value="fr">Français</option><option value="en">English (navigation & Wellness 5.3.5)</option></select></div>
+          <div><label for="w2-language">Langue</label><select id="w2-language"><option value="fr">Français</option><option value="en">English (navigation & Wellness 5.4.1)</option></select></div>
           <label class="toggle-row"><span><strong>Retour haptique</strong><small>Petite vibration sur mobile</small></span><input id="w2-haptics" type="checkbox"></label>
           <label class="toggle-row"><span><strong>Gestes tactiles</strong><small>Balayer pour changer de page</small></span><input id="w2-gestures" type="checkbox"></label>
         </div>
@@ -1748,6 +1738,7 @@
   <script src="ux-v53.js"></script>
   <script src="barcode-v532.js"></script>
   <script src="barcode-v534.js"></script>
+  <script src="layout-v541.js"></script>
 
 </body>
 

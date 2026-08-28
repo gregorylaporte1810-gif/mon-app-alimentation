@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "5.4.0";
+  const APP_VERSION = "5.4.1";
   const SCHEMA_VERSION = 4;
   const BACKUP_FORMAT = "wellness-backup";
   const PHOTO_REF_PREFIX = "idb://wellness-progress/";
@@ -22,7 +22,8 @@
     const finiteNonNegative = (value) => Number.isFinite(Number(value)) && Number(value) >= 0;
     const validDate = (value) => !value || Number.isFinite(Date.parse(String(value)));
 
-    (account.journalCalories || []).forEach((entry, index) => {
+    const journalEntries = Array.isArray(account.journalCalories) ? account.journalCalories : [];
+    journalEntries.forEach((entry, index) => {
       if (!entry || typeof entry !== "object") {
         errors.push(`Entrée journal #${index + 1} invalide pour ${id}.`);
         return;
@@ -38,7 +39,8 @@
       }
     });
 
-    (account.weightHistory || []).forEach((entry, index) => {
+    const weightEntries = Array.isArray(account.weightHistory) ? account.weightHistory : [];
+    weightEntries.forEach((entry, index) => {
       const weight = Number(entry?.weight);
       if (!Number.isFinite(weight) || weight <= 0 || weight > 500) {
         errors.push(`Poids invalide #${index + 1} pour ${id}.`);

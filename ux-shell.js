@@ -168,11 +168,9 @@
         <span class="px-coach-copy"><small>✦ Conseil du coach</small><strong id="px-coach-text">Ajoute quelques données pour recevoir un conseil personnalisé.</strong></span>
       </button>
 
-      <section class="px-meals-card px-card">
-        <div class="px-section-row"><strong>🍴 Aujourd'hui</strong><span id="px-meals-count">0 / 3 repas</span></div>
-        <button type="button" class="px-meal-check-row" data-meal-toggle="Petit-déjeuner"><span>🌅</span><strong>Petit-déjeuner</strong><i id="px-check-breakfast"></i></button>
-        <button type="button" class="px-meal-check-row" data-meal-toggle="Déjeuner"><span>☀️</span><strong>Déjeuner</strong><i id="px-check-lunch"></i></button>
-        <button type="button" class="px-meal-check-row" data-meal-toggle="Dîner"><span>🌙</span><strong>Dîner</strong><i id="px-check-dinner"></i></button>
+      <section class="px-journal-card px-card px-home-journal-card">
+        <p class="px-kicker">JOURNAL ALIMENTAIRE</p>
+        <div id="px-journal-list" class="px-journal-list"></div>
       </section>
 
       <section class="px-home-footer-grid">
@@ -229,9 +227,13 @@
         </div>
       </section>
 
-      <section class="px-journal-card px-card">
-        <p class="px-kicker">JOURNAL ALIMENTAIRE</p>
-        <div id="px-journal-list" class="px-journal-list"></div>
+      <div id="px-nutrition-tools-anchor" aria-hidden="true"></div>
+
+      <section class="px-meals-card px-card px-nutrition-meals-card">
+        <div class="px-section-row"><strong>🍴 Repas du jour</strong><span id="px-meals-count">0 / 3 repas</span></div>
+        <button type="button" class="px-meal-check-row" data-meal-toggle="Petit-déjeuner"><span>🌅</span><strong>Petit-déjeuner</strong><i id="px-check-breakfast"></i></button>
+        <button type="button" class="px-meal-check-row" data-meal-toggle="Déjeuner"><span>☀️</span><strong>Déjeuner</strong><i id="px-check-lunch"></i></button>
+        <button type="button" class="px-meal-check-row" data-meal-toggle="Dîner"><span>🌙</span><strong>Dîner</strong><i id="px-check-dinner"></i></button>
       </section>
 
       <section class="px-two-actions">
@@ -650,7 +652,7 @@
     premiumJournalSignature = journalSignature;
 
     const scrollBefore = window.scrollY;
-    const preserveScroll = document.getElementById("page-recettes")?.classList.contains("active") && scrollBefore > 0;
+    const preserveScroll = document.getElementById("page-accueil")?.classList.contains("active") && scrollBefore > 0;
 
     list.innerHTML = slots.map((slot) => {
       const slotEntries = entries.filter((entry) => (entry.repasSlot || "Déjeuner") === slot);

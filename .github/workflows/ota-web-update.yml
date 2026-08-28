@@ -37,6 +37,7 @@ on:
       - "ux-v53.js"
       - "barcode-v532.js"
       - "barcode-v534.js"
+      - "layout-v541.js"
       - "manifest.webmanifest"
       - "sw.js"
       - "icons/**"
@@ -57,6 +58,7 @@ on:
       - "scripts/test-v534-barcode.mjs"
       - "scripts/test-v535-steps-keyboard.mjs"
       - "scripts/test-v54-maintenance.mjs"
+      - "scripts/test-v541-layout.mjs"
       - "scripts/import-ciqual-2025.mjs"
       - "scripts/normalize-v41.mjs"
       - ".github/workflows/ota-web-update.yml"
@@ -95,7 +97,7 @@ jobs:
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="5.4.0-${GITHUB_SHA::12}"
+          VERSION="5.4.1-${GITHUB_SHA::12}"
           rm -rf /tmp/wellness-ota
           mkdir -p /tmp/wellness-ota
           (
@@ -106,7 +108,7 @@ jobs:
           cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
-            "appVersion": "5.4.0",
+            "appVersion": "5.4.1",
             "schemaVersion": 4,
             "sourceCommit": "${GITHUB_SHA}",
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",

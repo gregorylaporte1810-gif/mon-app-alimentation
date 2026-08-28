@@ -681,7 +681,8 @@
 
   function ensureSmartTools() {
     const journal = document.querySelector(".px-journal-card");
-    if (!journal || document.getElementById("v43-smart-tools")) return;
+    const anchor = document.getElementById("px-nutrition-tools-anchor") || journal;
+    if (!journal || !anchor || document.getElementById("v43-smart-tools")) return;
 
     const tools = document.createElement("section");
     tools.id = "v43-smart-tools";
@@ -715,9 +716,9 @@
     quality.id = "v43-quality-card";
     quality.className = "v43-quality-card px-card";
 
-    journal.parentElement.insertBefore(tools, journal);
-    journal.parentElement.insertBefore(remaining, journal);
-    journal.parentElement.insertBefore(quality, journal);
+    anchor.parentElement.insertBefore(tools, anchor);
+    anchor.parentElement.insertBefore(remaining, anchor);
+    anchor.parentElement.insertBefore(quality, anchor);
 
     document.getElementById("v43-copy-yesterday")?.addEventListener("click", copyYesterday);
     tools.querySelectorAll("[data-v43-tab]").forEach((button) => {

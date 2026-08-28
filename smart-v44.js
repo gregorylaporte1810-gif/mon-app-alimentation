@@ -202,7 +202,7 @@
   }
 
   function ensureQuickEntry() {
-    const anchor = document.getElementById("v43-smart-tools") || document.querySelector(".px-journal-card");
+    const anchor = document.getElementById("v43-smart-tools") || document.getElementById("px-nutrition-tools-anchor") || document.querySelector(".px-journal-card");
     if (!anchor || document.getElementById("v44-quick-entry")) return;
     const section = document.createElement("section");
     section.id = "v44-quick-entry";

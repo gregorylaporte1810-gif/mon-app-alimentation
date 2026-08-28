@@ -1,0 +1,198 @@
+
+/* ======================================================
+   WELLNESS V5.4.1 — RESPONSIVE + JOURNAL / REPAS SWAP
+====================================================== */
+
+/* ------------------------------------------------------
+   Base mobile stable — pas de largeur implicite > écran
+------------------------------------------------------ */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body,
+.app,
+.page,
+.px-screen,
+.px-header,
+.px-header-copy {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.app,
+.page,
+.px-screen {
+  width: 100% !important;
+}
+
+/* ------------------------------------------------------
+   Nutrition — vraie largeur mobile sur tous les iPhone
+------------------------------------------------------ */
+#page-recettes,
+#page-recettes .px-screen,
+#page-recettes .px-header,
+#page-recettes .px-nutrition-screen {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+
+#page-recettes .px-nutrition-screen > *,
+#page-recettes .px-card,
+#page-recettes .v43-smart-tools,
+#page-recettes .v43-remaining-card,
+#page-recettes .v43-quality-card,
+#page-recettes .v44-quick-entry,
+#page-recettes .v44-recipe-builder-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#page-recettes .px-search-bar {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center;
+}
+
+#page-recettes .px-search-bar > span:not(.px-filter-button),
+#page-recettes .px-header-copy,
+#page-recettes .px-macro-line > div,
+#page-recettes .px-nutrition-today,
+#page-recettes .v44-quick-line,
+#page-recettes .v43-section-head,
+#page-recettes .v44-section-head {
+  min-width: 0 !important;
+}
+
+#page-recettes .px-search-bar > span:not(.px-filter-button) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+#page-recettes .px-macro-line {
+  grid-template-columns: auto minmax(0, 1fr) max-content !important;
+}
+
+#page-recettes .px-macro-line em {
+  max-width: 92px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+#page-recettes .v44-quick-line {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+}
+
+#page-recettes input,
+#page-recettes select,
+#page-recettes textarea,
+#page-recettes button {
+  max-width: 100%;
+}
+
+/* Les carrousels gardent leur scroll horizontal à l'intérieur. */
+#page-recettes .v43-chip-row,
+#page-recettes .v43-quick-list,
+#page-recettes .v43-smart-list,
+#page-recettes .v44-suggestion-row,
+#page-recettes [data-horizontal-scroll] {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ------------------------------------------------------
+   Journal maintenant dans Aujourd'hui
+------------------------------------------------------ */
+#page-accueil .px-home-journal-card {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+#page-accueil .px-home-journal-card .px-journal-list,
+#page-accueil .px-home-journal-card .px-journal-group,
+#page-accueil .px-home-journal-card .px-journal-entry,
+#page-accueil .px-home-journal-card .px-journal-entry-main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#page-accueil .px-home-journal-card .px-journal-entry-main strong,
+#page-accueil .px-home-journal-card .px-journal-entry-main small {
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------
+   Validation repas maintenant dans Nutrition
+------------------------------------------------------ */
+#page-recettes .px-nutrition-meals-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+#page-recettes .px-nutrition-meals-card .px-meal-check-row {
+  width: 100%;
+  min-width: 0;
+}
+
+#px-nutrition-tools-anchor {
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------
+   iPhone compact — aucune carte ne doit dépasser l'écran
+------------------------------------------------------ */
+@media (max-width: 480px) {
+  #page-recettes .px-screen,
+  #page-accueil .px-screen {
+    padding-left: max(14px, env(safe-area-inset-left)) !important;
+    padding-right: max(14px, env(safe-area-inset-right)) !important;
+  }
+
+  #page-recettes .px-header,
+  #page-accueil .px-header {
+    padding-left: max(18px, env(safe-area-inset-left)) !important;
+    padding-right: max(18px, env(safe-area-inset-right)) !important;
+  }
+
+  #page-recettes .px-nutrition-today,
+  #page-recettes .v43-smart-tools,
+  #page-recettes .v43-remaining-card,
+  #page-recettes .v43-quality-card,
+  #page-recettes .v44-quick-entry,
+  #page-recettes .px-nutrition-meals-card {
+    border-radius: 20px;
+  }
+
+  #page-recettes .px-macro-line {
+    column-gap: 9px !important;
+  }
+
+  #page-recettes .px-macro-line em {
+    font-size: .66rem !important;
+    max-width: 78px;
+  }
+
+  #page-recettes .px-search-bar {
+    min-height: 58px !important;
+  }
+}
