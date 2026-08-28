@@ -23,3 +23,11 @@ with check (auth.uid() = user_id);
 create policy "Users can delete their wellness data"
 on public.wellness_sync for delete
 using (auth.uid() = user_id);
+
+
+-- Permissions requises pour les utilisateurs authentifiés.
+grant usage on schema public to authenticated;
+
+grant select, insert, update, delete
+on table public.wellness_sync
+to authenticated;
