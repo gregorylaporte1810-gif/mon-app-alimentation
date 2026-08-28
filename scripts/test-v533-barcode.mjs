@@ -6,20 +6,19 @@ const native = readFileSync("native-bridge.js", "utf8");
 const checks = [
   [
     "lookup retourne true si produit trouvé",
-    w2.includes("return true;") &&
-    w2.includes("WellnessBarcodeFlowV532")
+    w2.includes("return true;") && w2.includes("WellnessBarcodeFlowV532"),
   ],
   [
     "lookup retourne false si produit absent",
-    w2.includes("Produit non trouvé dans Open Food Facts.</p>';return false;")
+    /Produit non trouvé dans Open Food Facts\.<\/p>';\s*return false;/.test(w2),
   ],
   [
     "scanner natif attend le résultat",
-    native.includes("const found = await w2LookupBarcode(value);")
+    native.includes("const found = await w2LookupBarcode(value);"),
   ],
   [
     "scanner natif ne rouvre que si échec",
-    native.includes("if (found !== true)")
+    native.includes("if (found !== true)"),
   ],
   [
     "ancienne réouverture avant lookup supprimée",
@@ -27,7 +26,7 @@ const checks = [
           }
 
           setMessage("w2-barcode-help", \`Code détecté : \${value}. Recherche du produit…\`);
-          await w2LookupBarcode(value);`)
+          await w2LookupBarcode(value);`),
   ],
 ];
 

@@ -1,10 +1,4 @@
-import {
-  cpSync,
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  rmSync,
-} from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
@@ -27,6 +21,7 @@ const files = [
   "hardening-core.js",
   "hardening.js",
   "data-foods.js",
+  "ciqual-loader.js",
   "data-foods-ciqual.js",
   "food-units-core.js",
   "food-v42.js",
