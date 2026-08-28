@@ -1,7 +1,8 @@
-const CACHE = "wellness-5.3.5";
+const CACHE = "wellness-5.4.0";
 const ASSETS = [
   "./",
   "./index.html",
+  "./theme-bootstrap.js",
   "./style.css",
   "./core-utils.js",
   "./hardening-core.js",
@@ -59,6 +60,19 @@ self.addEventListener("fetch", event => {
         caches.open(CACHE).then(cache => cache.put(event.request, copy));
         return response;
       })
-      .catch(() => caches.match(event.request).then(hit => hit || caches.match("./index.html")))
+      .catch(async () => {
+        const hit = await caches.match(event.request);
+        if (hit) return hit;
+
+        if (event.request.mode === "navigate") {
+          return (await caches.match("./index.html")) ||
+            new Response("Wellness hors ligne", {
+              status: 503,
+              headers: { "Content-Type": "text/plain; charset=utf-8" },
+            });
+        }
+
+        return new Response("", { status: 504, statusText: "Offline resource unavailable" });
+      })
   );
 });

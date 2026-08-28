@@ -13,6 +13,40 @@
   const ACTIVE_VERSION_KEY = "wellnessOtaActiveVersion";
   const LAST_CHECK_KEY = "wellnessOtaLastCheck";
   const CHECK_INTERVAL_MS = 15 * 60 * 1000;
+  const BUNDLED_APP_VERSION = "5.4.0";
+  const SUPPORTED_SCHEMA_VERSION = 4;
+
+  function semverCore(value) {
+    const m = String(value || "").match(/(\d+)\.(\d+)\.(\d+)/);
+    return m ? m.slice(1).map(Number) : [0, 0, 0];
+  }
+
+  function compareSemver(a, b) {
+    const left = semverCore(a);
+    const right = semverCore(b);
+    for (let i = 0; i < 3; i += 1) {
+      if (left[i] !== right[i]) return left[i] > right[i] ? 1 : -1;
+    }
+    return 0;
+  }
+
+  function manifestSafeForInstall(manifest, currentVersion) {
+    const schema = Number(manifest?.schemaVersion);
+    if (Number.isFinite(schema) && schema > SUPPORTED_SCHEMA_VERSION) {
+      return { ok: false, reason: `schéma OTA trop récent (${schema})` };
+    }
+
+    const remoteApp = String(manifest?.appVersion || manifest?.version || "");
+    const currentCore = currentVersion && currentVersion !== "builtin"
+      ? currentVersion
+      : BUNDLED_APP_VERSION;
+
+    if (compareSemver(remoteApp, currentCore) < 0) {
+      return { ok: false, reason: `downgrade refusé (${remoteApp} < ${currentCore})` };
+    }
+
+    return { ok: true, reason: "" };
+  }
 
   let updateCheckRunning = false;
   let updater = null;
@@ -129,6 +163,11 @@
     try {
       const manifest = await fetchManifest();
       const currentVersion = await getCurrentVersion();
+      const safety = manifestSafeForInstall(manifest, currentVersion);
+      if (!safety.ok) {
+        console.warn("[Wellness OTA] Mise à jour ignorée :", safety.reason);
+        return;
+      }
       const pendingVersion = localStorage.getItem(PENDING_VERSION_KEY);
 
       if (manifest.version === currentVersion || manifest.version === pendingVersion) {

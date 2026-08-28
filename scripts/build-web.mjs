@@ -18,6 +18,7 @@ mkdirSync(webDir, { recursive: true });
 
 const files = [
   "index.html",
+  "theme-bootstrap.js",
   "style.css",
   "app.js",
   "features.js",

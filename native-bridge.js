@@ -121,7 +121,13 @@
     if (!raw) throw new Error("Impossible de lire ce fichier.");
 
     const data = JSON.parse(raw);
-    if (data?.format !== "wellness-backup" || !data?.app?.comptes) {
+    const validator = window.WellnessHardeningCore?.validateBackup;
+    if (typeof validator === "function") {
+      const validation = validator(data);
+      if (!validation.ok) {
+        throw new Error(validation.errors?.[0] || "Sauvegarde Wellness invalide.");
+      }
+    } else if (data?.format !== "wellness-backup" || !data?.app?.comptes) {
       throw new Error("Format de sauvegarde Wellness non reconnu.");
     }
 

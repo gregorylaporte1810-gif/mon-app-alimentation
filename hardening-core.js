@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const APP_VERSION = "5.3.5";
+  const APP_VERSION = "5.4.0";
   const SCHEMA_VERSION = 4;
   const BACKUP_FORMAT = "wellness-backup";
   const PHOTO_REF_PREFIX = "idb://wellness-progress/";
@@ -16,6 +16,44 @@
 
   function validFinite(value) {
     return Number.isFinite(Number(value));
+  }
+
+  function validateAccountEntries(account, id, errors) {
+    const finiteNonNegative = (value) => Number.isFinite(Number(value)) && Number(value) >= 0;
+    const validDate = (value) => !value || Number.isFinite(Date.parse(String(value)));
+
+    (account.journalCalories || []).forEach((entry, index) => {
+      if (!entry || typeof entry !== "object") {
+        errors.push(`Entrée journal #${index + 1} invalide pour ${id}.`);
+        return;
+      }
+      for (const key of ["calories", "proteines", "glucides", "lipides", "fibres"]) {
+        if (entry[key] != null && !finiteNonNegative(entry[key])) {
+          errors.push(`Valeur ${key} invalide dans le journal de ${id}.`);
+          break;
+        }
+      }
+      if (entry.date && !validDate(entry.date)) {
+        errors.push(`Date invalide dans le journal de ${id}.`);
+      }
+    });
+
+    (account.weightHistory || []).forEach((entry, index) => {
+      const weight = Number(entry?.weight);
+      if (!Number.isFinite(weight) || weight <= 0 || weight > 500) {
+        errors.push(`Poids invalide #${index + 1} pour ${id}.`);
+      }
+      if (entry?.date && !validDate(entry.date)) {
+        errors.push(`Date de poids invalide pour ${id}.`);
+      }
+    });
+
+    if (account.pasEffectues != null && !finiteNonNegative(account.pasEffectues)) {
+      errors.push(`Nombre de pas invalide pour ${id}.`);
+    }
+    if (account.verresEau != null && !finiteNonNegative(account.verresEau)) {
+      errors.push(`Hydratation invalide pour ${id}.`);
+    }
   }
 
   function validateAppState(app) {
@@ -51,6 +89,8 @@
       if (account.repas != null && !isObject(account.repas)) {
         errors.push(`Repas invalides pour ${id}.`);
       }
+
+      validateAccountEntries(account, id, errors);
     });
 
     return { ok: errors.length === 0, errors };

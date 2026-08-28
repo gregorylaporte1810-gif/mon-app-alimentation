@@ -1,55 +1,47 @@
-# Wellness 2.0 Pro
+# Wellness 5.4
 
-Application Web/PWA locale de suivi nutrition, activité et habitudes.
+Application iPhone / PWA de suivi quotidien du bien-être.
 
-## Nouveautés 2.0 Pro
+## Fonctions principales
 
-- Coach quotidien et score bien-être explicable
-- Base alimentaire locale avec portions et macros
-- Scanner code-barres via `BarcodeDetector` quand disponible + recherche Open Food Facts
-- Capture photo de repas avec recherche assistée et connecteur IA optionnel
-- Objectifs avancés : perte, muscle, maintien, recomposition, mieux manger, activité
-- Prévision de poids et comparaison semaine/semaine
-- Sommeil, humeur, énergie et activités sportives
-- Missions hebdomadaires + XP existant
-- Préférences alimentaires, allergies/exclusions et recommandations « Pour toi »
-- Bouton universel `+`, gestes tactiles, vibration mobile et safe-area iPhone
-- Centre de notifications dans l'application
-- Liste de courses avec fusion g/kg et ml/cl/l
-- Sauvegarde/restauration JSON
-- Synchronisation Supabase optionnelle
-- Modules séparés : `core-utils.js`, `data-foods.js`, `cloud.js`, `wellness2.js`
-- Tests purs dans `tests.html`
+- Tableau Aujourd'hui : score, priorités, calories, protéines, hydratation, pas, repas et coach.
+- Nutrition : base ANSES Ciqual, Open Food Facts, scanner code-barres, journal par repas, macros, fibres, sel, sucres et graisses saturées.
+- Quantités : g, kg, ml, cl, L et portions personnalisées selon l'aliment.
+- Ajout rapide : récents, fréquents, favoris, repas enregistrés, copier hier et recommandations.
+- Plan : petit-déjeuner, déjeuner, dîner, collation, semaine et liste de courses.
+- Progrès : poids, mensurations, photos, sommeil, humeur, activité, calendrier et comparaison hebdomadaire.
+- Profils multiples avec données séparées.
+- Rappels iOS locaux.
+- Export / sauvegarde JSON, restauration validée et rollback.
+- Synchronisation Supabase optionnelle avec RLS ; session native protégée par le Trousseau iOS.
+- PWA hors ligne et mises à jour OTA de l'application native.
+- Apple Santé intégré côté code ; l'accès peut rester indisponible selon la signature iOS utilisée.
 
-## Lancer
+## Développement
 
-Utiliser Live Server, `python -m http.server` ou un autre serveur local. La PWA, la caméra et le service worker ne fonctionnent pas correctement avec `file://`.
+Node.js 22+.
 
-## Synchronisation Supabase
-
-1. Créer un projet Supabase.
-2. Exécuter `SUPABASE_SETUP.sql` dans le SQL Editor.
-3. Dans Profil > Compte cloud, renseigner **Project URL** et la **clé anon publique**.
-4. Créer un compte email/mot de passe, puis utiliser Envoyer/Récupérer.
-
-Ne jamais mettre une clé `service_role` dans l'application.
-
-## Photo de repas
-
-La capture photo fonctionne localement. La reconnaissance automatique réelle nécessite un backend IA que tu contrôles. L'endpoint configurable reçoit un POST JSON :
-
-```json
-{"image":"data:image/jpeg;base64,...","description":"poulet riz","locale":"fr-FR"}
+```bash
+npm ci
+npm run verify
 ```
 
-Il doit répondre par exemple :
+Le build web est généré dans `www/`.
 
-```json
-{"foods":[{"name":"Poulet","kcal100":165,"protein100":31,"carbs100":0,"fat100":3.6}]}
-```
+## Mise à jour OTA
 
-Sans endpoint, l'app utilise la description pour rechercher dans la base alimentaire locale.
+Les mises à jour web sont publiées sur la branche `ota` après validation complète par GitHub Actions.
+Depuis la V5.4, l'updater refuse explicitement tout downgrade et tout schéma de données plus récent que celui pris en charge.
 
-## Limites importantes
+## Sécurité et données
 
-Les calories, macros, objectifs et prévisions sont des estimations de suivi, pas des prescriptions médicales. Les valeurs de la base locale sont des moyennes indicatives. Pour les allergies sévères, toujours vérifier les étiquettes et ingrédients réels.
+- Ne jamais utiliser de clé Supabase `service_role` dans l'application.
+- La clé `anon` est la seule clé publique attendue.
+- Les règles RLS de `SUPABASE_SETUP.sql` isolent les données par utilisateur.
+- Les sauvegardes sont validées avant restauration.
+- Sur iPhone natif, la session cloud est stockée via Secure Storage / Trousseau iOS.
+
+## Limites
+
+Wellness est un outil de suivi bien-être. Les calories, macros, prévisions de poids et suggestions sont indicatives et ne remplacent pas un professionnel de santé.
+Pour une allergie sévère, vérifier toujours l'étiquette et les ingrédients réels du produit.
