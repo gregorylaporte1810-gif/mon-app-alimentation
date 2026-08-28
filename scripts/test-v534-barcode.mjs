@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 
 const runtime = readFileSync("barcode-v534.js", "utf8");
-const installer = readFileSync("apply-v534-barcode-button-close.mjs", "utf8");
+const build = readFileSync("scripts/build-web.mjs", "utf8");
 
 const checks = [
   ["listens to choose quantity button", runtime.includes('#w2-add-barcode-product')],
@@ -9,7 +9,11 @@ const checks = [
   ["keeps portion modal active", runtime.includes('portion?.classList.contains("ouverte")')],
   ["stops camera", runtime.includes("w2StopBarcodeCamera")],
   ["runs after original button listener", runtime.includes("setTimeout(() =>")],
-  ["installer includes runtime", installer.includes("barcode-v534.js")],
+  [
+    "runtime is included in production build",
+    runtime.includes("WellnessBarcodeButtonCloseV534") &&
+      build.includes('"barcode-v534.js"'),
+  ],
 ];
 
 let passed = 0;
