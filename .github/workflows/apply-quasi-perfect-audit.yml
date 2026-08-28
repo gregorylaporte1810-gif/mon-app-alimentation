@@ -27,7 +27,9 @@ jobs:
           package-manager-cache: false
 
       - name: Apply source hardening
-        run: python3 scripts/apply-quasi-perfect-audit.py
+        run: |
+          python3 scripts/apply-quasi-perfect-audit.py
+          python3 scripts/fix-html-validation.py
 
       - name: Add quality test dependencies
         run: npm install --save-dev --save-exact @playwright/test@1.62.1 @axe-core/playwright@4.13.0 html-validate@11.10.0
@@ -51,6 +53,7 @@ jobs:
           set -euo pipefail
           rm -f scripts/apply-quasi-perfect-audit.mjs
           rm -f scripts/apply-quasi-perfect-audit.py
+          rm -f scripts/fix-html-validation.py
           rm -f .github/workflows/apply-quasi-perfect-audit.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
