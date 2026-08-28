@@ -1,5 +1,3 @@
-@'
-
 # Wellness 5.5.0
 
 Application de suivi personnel dédiée à la nutrition, l’hydratation, l’activité, le sommeil, le poids et l’organisation des repas.
@@ -92,3 +90,31 @@ Prérequis : Node.js 22 ou supérieur et npm.
 ```bash
 npm install
 ```
+
+## Vérifications
+
+```bash
+npm test
+npm run check:syntax
+npm audit
+npm run build:web
+npm run cap:doctor
+```
+
+## Build Web
+
+Le dossier `www/` est généré automatiquement à partir des sources :
+
+```bash
+npm run build:web
+```
+
+## Mises à jour OTA
+
+Les mises à jour OTA utilisent une version d’application, une version de schéma, une origine explicitement autorisée et une empreinte SHA-256 du bundle.
+
+Le SHA-256 permet de détecter un bundle différent de celui déclaré dans le manifeste. Il ne constitue pas à lui seul une signature cryptographique du manifeste.
+
+## Version
+
+**Wellness 5.5.0**
