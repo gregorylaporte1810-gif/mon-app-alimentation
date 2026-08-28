@@ -75,10 +75,11 @@ jobs:
   publish:
     name: Verify and publish dedicated OTA channel
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout main
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -89,12 +90,16 @@ jobs:
         run: npm ci
 
       - name: Verify source
-        run: npm run verify
+        run: npm run verify:ci
 
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="5.5.0-${GITHUB_SHA::12}"
+          set -euo pipefail
+
+          APP_VERSION="$(node -p "require('./package.json').version")"
+          VERSION="${APP_VERSION}-${GITHUB_SHA::12}"
+
           rm -rf /tmp/wellness-ota
           mkdir -p /tmp/wellness-ota
           (
@@ -103,23 +108,36 @@ jobs:
           )
 
           SHA256="$(sha256sum /tmp/wellness-ota/wellness-web.zip | awk '{print $1}')"
+          BUNDLE_SIZE="$(stat -c '%s' /tmp/wellness-ota/wellness-web.zip)"
 
           cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
-            "appVersion": "5.5.0",
+            "appVersion": "${APP_VERSION}",
             "schemaVersion": 4,
             "sourceCommit": "${GITHUB_SHA}",
             "sha256": "${SHA256}",
+            "size": ${BUNDLE_SIZE},
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",
             "message": "Mise à jour automatique Wellness",
             "publishedAt": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           }
           EOF
 
+          node -e '
+            const fs = require("fs");
+            const manifest = JSON.parse(fs.readFileSync("/tmp/wellness-ota/latest.json", "utf8"));
+            if (!/^[0-9a-f]{40}$/i.test(manifest.sourceCommit)) throw new Error("sourceCommit OTA invalide");
+            if (!/^[0-9a-f]{64}$/i.test(manifest.sha256)) throw new Error("SHA-256 OTA invalide");
+            if (!Number.isInteger(manifest.size) || manifest.size <= 0) throw new Error("Taille OTA invalide");
+            if (!manifest.version.startsWith(`${manifest.appVersion}-`)) throw new Error("Version OTA incohérente");
+          '
+
       - name: Publish to dedicated ota branch
         shell: bash
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 

@@ -9,18 +9,22 @@ workflows:
       xcode: 26.4
 
     scripts:
+      - name: Verify build provenance
+        script: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "Wellness ${VERSION}"
+          echo "Commit ${HEAD_SHA}"
+          echo "Branch ${CM_BRANCH:-unknown}"
+
       - name: Install npm dependencies
         script: |
           npm ci
 
-      - name: Verify web code
+      - name: Verify project
         script: |
-          npm run check:syntax
-          npm test
-
-      - name: Build web assets
-        script: |
-          npm run build:web
+          npm run verify:ci
 
       - name: Create Capacitor iOS project
         script: |
@@ -60,18 +64,33 @@ workflows:
       xcode: 26.4
 
     scripts:
+      - name: Verify build provenance
+        script: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "Wellness ${VERSION}"
+          echo "Commit ${HEAD_SHA}"
+          echo "Branch ${CM_BRANCH:-unknown}"
+
+          if [ "${CM_BRANCH:-}" = "main" ]; then
+            git fetch origin main --depth=1
+            MAIN_SHA="$(git rev-parse FETCH_HEAD)"
+            if [ "${HEAD_SHA}" != "${MAIN_SHA}" ]; then
+              echo "Refus du build : le commit sélectionné n'est pas le dernier commit de main."
+              echo "Commit sélectionné : ${HEAD_SHA}"
+              echo "Dernier main       : ${MAIN_SHA}"
+              exit 1
+            fi
+          fi
+
       - name: Install npm dependencies
         script: |
           npm ci
 
-      - name: Verify web code
+      - name: Verify project
         script: |
-          npm run check:syntax
-          npm test
-
-      - name: Build web assets
-        script: |
-          npm run build:web
+          npm run verify:ci
 
       - name: Create Capacitor iOS project
         script: |
@@ -102,20 +121,41 @@ workflows:
 
       - name: Package unsigned IPA
         script: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          FULL_SHA="$(git rev-parse HEAD)"
+          SHORT_SHA="$(git rev-parse --short=12 HEAD)"
+          IPA_NAME="Wellness-${VERSION}-${SHORT_SHA}-unsigned.ipa"
+          BUILD_INFO="Wellness-${VERSION}-${SHORT_SHA}-build.txt"
           APP_PATH="build/ios-device/Build/Products/Release-iphoneos/App.app"
+
           test -d "$APP_PATH"
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$APP_PATH/Info.plist"
           /usr/libexec/PlistBuddy -c "Print :NSHealthShareUsageDescription" "$APP_PATH/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :NSHealthUpdateUsageDescription" "$APP_PATH/Info.plist"
           /usr/bin/codesign --force --deep --sign - --entitlements ios/App/App/App.entitlements "$APP_PATH"
           /usr/bin/codesign -d --entitlements :- "$APP_PATH" 2>&1 | grep -q "com.apple.developer.healthkit"
+
           rm -rf build/unsigned-ipa
           mkdir -p build/unsigned-ipa/Payload
           cp -R "$APP_PATH" build/unsigned-ipa/Payload/App.app
-          cd build/unsigned-ipa
-          zip -qry ../Wellness-unsigned.ipa Payload
-          cd ../..
-          ls -lh build/Wellness-unsigned.ipa
+
+          (
+            cd build/unsigned-ipa
+            zip -qry "../${IPA_NAME}" Payload
+          )
+
+          printf 'version=%s\ncommit=%s\nbranch=%s\ncodemagic_build_id=%s\n' \
+            "$VERSION" \
+            "$FULL_SHA" \
+            "${CM_BRANCH:-unknown}" \
+            "${CM_BUILD_ID:-unknown}" \
+            > "build/${BUILD_INFO}"
+
+          ls -lh "build/${IPA_NAME}"
+          cat "build/${BUILD_INFO}"
 
     artifacts:
-      - build/Wellness-unsigned.ipa
+      - build/Wellness-*-unsigned.ipa
+      - build/Wellness-*-build.txt
       - /tmp/xcodebuild_logs/*.log
