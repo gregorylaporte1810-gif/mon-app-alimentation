@@ -19,3 +19,7 @@ create policy "Users can update their wellness data"
 on public.wellness_sync for update
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+create policy "Users can delete their wellness data"
+on public.wellness_sync for delete
+using (auth.uid() = user_id);

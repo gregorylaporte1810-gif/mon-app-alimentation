@@ -28,39 +28,51 @@ window.WellnessCore = (() => {
   function macroAdherence(value, target) {
     const t = Number(target) || 0;
     if (t <= 0) return 0;
-    return Math.round(clamp((Number(value) || 0) / t * 100, 0, 100));
+    return Math.round(clamp(((Number(value) || 0) / t) * 100, 0, 100));
   }
 
   function healthScore(metrics = {}) {
     const parts = [];
     const add = (value, weight) => {
-      if (Number.isFinite(Number(value))) parts.push({ value: clamp(value, 0, 100), weight });
+      if (Number.isFinite(Number(value)))
+        parts.push({ value: clamp(value, 0, 100), weight });
     };
     add(metrics.waterPct, 1.15);
     add(metrics.stepsPct, 1.15);
     add(metrics.mealsPct, 0.75);
-    if (Number(metrics.calorieTarget) > 0) add(calorieAdherence(metrics.calories, metrics.calorieTarget), 1.1);
-    if (Number(metrics.proteinTarget) > 0) add(macroAdherence(metrics.protein, metrics.proteinTarget), 0.9);
+    if (Number(metrics.calorieTarget) > 0)
+      add(calorieAdherence(metrics.calories, metrics.calorieTarget), 1.1);
+    if (Number(metrics.proteinTarget) > 0)
+      add(macroAdherence(metrics.protein, metrics.proteinTarget), 0.9);
     if (Number(metrics.sleepHours) > 0) {
       const sleep = Number(metrics.sleepHours);
-      const sleepScore = sleep >= 7 && sleep <= 9 ? 100 : sleep < 7 ? clamp(sleep / 7 * 100, 0, 100) : clamp(100 - (sleep - 9) * 14, 40, 100);
+      const sleepScore =
+        sleep >= 7 && sleep <= 9
+          ? 100
+          : sleep < 7
+            ? clamp((sleep / 7) * 100, 0, 100)
+            : clamp(100 - (sleep - 9) * 14, 40, 100);
       add(sleepScore, 1.05);
     }
-    if (Number(metrics.mood) > 0) add(Number(metrics.mood) / 5 * 100, 0.55);
+    if (Number(metrics.mood) > 0) add((Number(metrics.mood) / 5) * 100, 0.55);
     if (!parts.length) return 0;
     const totalWeight = parts.reduce((s, p) => s + p.weight, 0);
-    return Math.round(parts.reduce((s, p) => s + p.value * p.weight, 0) / totalWeight);
+    return Math.round(
+      parts.reduce((s, p) => s + p.value * p.weight, 0) / totalWeight,
+    );
   }
 
   function percentDelta(current, previous) {
     const c = Number(current) || 0;
     const p = Number(previous) || 0;
     if (p === 0) return c === 0 ? 0 : null;
-    return round1((c - p) / Math.abs(p) * 100);
+    return round1(((c - p) / Math.abs(p)) * 100);
   }
 
   function linearRegression(points) {
-    const clean = (points || []).filter((p) => Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.y)));
+    const clean = (points || []).filter(
+      (p) => Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.y)),
+    );
     if (clean.length < 2) return null;
     const n = clean.length;
     const sx = clean.reduce((s, p) => s + Number(p.x), 0);
@@ -81,9 +93,12 @@ window.WellnessCore = (() => {
       const weight = Number(e?.weight);
       if (Number.isNaN(date.getTime()) || !Number.isFinite(weight)) return;
       const createdAt = Date.parse(e?.createdAt || "");
-      const order = Number.isFinite(createdAt) ? createdAt : date.getTime() + index;
+      const order = Number.isFinite(createdAt)
+        ? createdAt
+        : date.getTime() + index;
       const previous = latestByDay.get(e.date);
-      if (!previous || order >= previous.order) latestByDay.set(e.date, { date, weight, order });
+      if (!previous || order >= previous.order)
+        latestByDay.set(e.date, { date, weight, order });
     });
     const clean = [...latestByDay.values()]
       .sort((a, b) => a.date - b.date)
@@ -93,48 +108,123 @@ window.WellnessCore = (() => {
     const last = clean[clean.length - 1];
     const startMs = clean[0].date.getTime();
     const day = 86400000;
-    const points = clean.map((e) => ({ x: (e.date.getTime() - startMs) / day, y: e.weight }));
+    const points = clean.map((e) => ({
+      x: (e.date.getTime() - startMs) / day,
+      y: e.weight,
+    }));
     const regression = linearRegression(points);
     let dailyRate = regression?.slope || 0;
     const needsLoss = targetWeight < last.weight;
     const needsGain = targetWeight > last.weight;
-    const trendUseful = (needsLoss && dailyRate < -0.005) || (needsGain && dailyRate > 0.005);
+    const trendUseful =
+      (needsLoss && dailyRate < -0.005) || (needsGain && dailyRate > 0.005);
     let source = "tendance";
     if (!trendUseful) {
-      const weekly = goalMode === "muscle" ? 0.2 : goalMode === "loss" ? -0.4 : goalMode === "recomp" ? -0.15 : 0;
+      const weekly =
+        goalMode === "muscle"
+          ? 0.2
+          : goalMode === "loss"
+            ? -0.4
+            : goalMode === "recomp"
+              ? -0.15
+              : 0;
       dailyRate = weekly / 7;
       source = "rythme indicatif";
     }
-    if (Math.abs(dailyRate) < 0.001) return { date: null, days: null, dailyRate, source, current: last.weight, target: targetWeight };
+    if (Math.abs(dailyRate) < 0.001)
+      return {
+        date: null,
+        days: null,
+        dailyRate,
+        source,
+        current: last.weight,
+        target: targetWeight,
+      };
     const days = (targetWeight - last.weight) / dailyRate;
-    if (!Number.isFinite(days) || days < 0 || days > 730) return { date: null, days: null, dailyRate, source, current: last.weight, target: targetWeight };
+    if (!Number.isFinite(days) || days < 0 || days > 730)
+      return {
+        date: null,
+        days: null,
+        dailyRate,
+        source,
+        current: last.weight,
+        target: targetWeight,
+      };
     const date = new Date(last.date);
     date.setDate(date.getDate() + Math.ceil(days));
-    return { date, days: Math.ceil(days), dailyRate, source, current: last.weight, target: targetWeight };
+    return {
+      date,
+      days: Math.ceil(days),
+      dailyRate,
+      source,
+      current: last.weight,
+      target: targetWeight,
+    };
+  }
+
+  function normalizeFoodText(value) {
+    return ` ${String(value || "")
+      .toLowerCase()
+      .replace(/œ/g, "oe")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()} `;
   }
 
   function recipeText(recipe) {
-    return [recipe?.nom, recipe?.categorie, recipe?.typeRepas, ...(recipe?.ingredients || [])].join(" ").toLowerCase();
+    return normalizeFoodText(
+      [
+        recipe?.nom,
+        recipe?.categorie,
+        recipe?.typeRepas,
+        ...(recipe?.ingredients || []),
+      ].join(" "),
+    );
   }
 
   const sets = {
-    meat: /poulet|dinde|b[œo]uf|boeuf|porc|jambon|steak|viande|filet mignon/,
-    fish: /saumon|thon|cabillaud|colin|sardine|crevette|poisson|fruits? de mer/,
-    dairy: /lait|fromage|feta|ricotta|mozzarella|skyr|yaourt|parmesan|cr[eè]me/,
-    egg: /\bœufs?\b|\boeufs?\b|omelette/,
-    gluten: /pain|p[aâ]tes|pate|farine|tortilla|semoule|boulgour|orzo|gnocchi|cro[uû]ton|muesli|granola|avoine/,
-    nuts: /amande|noix|noisette|cacahu[eè]te|pistache|noix de cajou|pur[eé]e d.amande/,
-    soy: /tofu|soja|edamame/,
-    shellfish: /crevette|crabe|homard|moule|hu[iî]tre|fruits? de mer/,
+    meat: /\b(?:poulet|dinde|boeuf|veau|agneau|canard|porc|jambon|steak|viande|lard|bacon|saucisse|chorizo|filet mignon)\b/,
+
+    fish: /\b(?:saumon|thon|cabillaud|colin|sardine|maquereau|truite|anchois|poisson|fruits? de mer)\b/,
+
+    dairy:
+      /\b(?:lait|fromage|feta|ricotta|mozzarella|skyr|yaourt|parmesan|creme|beurre)\b/,
+
+    egg: /\b(?:oeuf|oeufs|omelette)\b/,
+
+    gluten:
+      /\b(?:pain|pates|pate|farine|tortilla|semoule|boulgour|orzo|gnocchi|crouton|croutons|muesli|granola|avoine)\b/,
+
+    nuts: /\b(?:amande|amandes|noix|noisette|noisettes|cacahuete|cacahuetes|pistache|pistaches|noix de cajou|puree d amande)\b/,
+
+    soy: /\b(?:tofu|soja|edamame|edamames)\b/,
+
+    shellfish:
+      /\b(?:crevette|crevettes|crabe|crabes|homard|homards|moule|moules|huitre|huitres|fruits? de mer)\b/,
   };
 
   function recipeAllowed(recipe, prefs = {}) {
     const text = recipeText(recipe);
     const diet = prefs.diet || "omnivore";
-    if (diet === "vegetarian" && (sets.meat.test(text) || sets.fish.test(text))) return false;
-    if (diet === "vegan" && (sets.meat.test(text) || sets.fish.test(text) || sets.dairy.test(text) || sets.egg.test(text))) return false;
+    if (diet === "vegetarian" && (sets.meat.test(text) || sets.fish.test(text)))
+      return false;
+    if (
+      diet === "vegan" &&
+      (sets.meat.test(text) ||
+        sets.fish.test(text) ||
+        sets.dairy.test(text) ||
+        sets.egg.test(text))
+    )
+      return false;
     if (diet === "pescatarian" && sets.meat.test(text)) return false;
-    if (prefs.noPork && /porc|jambon|filet mignon/.test(text)) return false;
+    if (
+      prefs.noPork &&
+      /\b(?:porc|jambon|lard|bacon|chorizo|filet mignon)\b/.test(text)
+    ) {
+      return false;
+    }
     const allergies = new Set(prefs.allergies || []);
     if (allergies.has("lactose") && sets.dairy.test(text)) return false;
     if (allergies.has("gluten") && sets.gluten.test(text)) return false;
@@ -143,7 +233,9 @@ window.WellnessCore = (() => {
     if (allergies.has("fish") && sets.fish.test(text)) return false;
     if (allergies.has("shellfish") && sets.shellfish.test(text)) return false;
     if (allergies.has("soy") && sets.soy.test(text)) return false;
-    const disliked = (prefs.disliked || []).map((x) => String(x).trim().toLowerCase()).filter(Boolean);
+    const disliked = (prefs.disliked || [])
+      .map((x) => String(x).trim().toLowerCase())
+      .filter(Boolean);
     if (disliked.some((x) => text.includes(x))) return false;
     return true;
   }
@@ -156,19 +248,35 @@ window.WellnessCore = (() => {
     const proteinRemaining = Number(context.proteinRemaining);
     if (Number.isFinite(remaining) && remaining > 0) {
       const ratio = kcal / remaining;
-      if (ratio >= .35 && ratio <= .85) score += 22;
+      if (ratio >= 0.35 && ratio <= 0.85) score += 22;
       else if (ratio <= 1.05) score += 10;
       else score -= 22;
     }
-    if (Number.isFinite(proteinRemaining) && proteinRemaining > 0) score += Math.min(22, protein / proteinRemaining * 22);
+    if (Number.isFinite(proteinRemaining) && proteinRemaining > 0)
+      score += Math.min(22, (protein / proteinRemaining) * 22);
     if ((Number(recipe?.temps) || 99) <= 20) score += 6;
-    if (context.goalMode === "muscle" || context.goalMode === "recomp" || context.goalMode === "loss") score += Math.min(10, protein / 4);
+    if (
+      context.goalMode === "muscle" ||
+      context.goalMode === "recomp" ||
+      context.goalMode === "loss"
+    )
+      score += Math.min(10, protein / 4);
     return score;
   }
 
   return {
-    round1, clamp, kgToLb, lbToKg, scaleFood, calorieAdherence, macroAdherence,
-    healthScore, percentDelta, linearRegression, weightForecast, recipeAllowed,
+    round1,
+    clamp,
+    kgToLb,
+    lbToKg,
+    scaleFood,
+    calorieAdherence,
+    macroAdherence,
+    healthScore,
+    percentDelta,
+    linearRegression,
+    weightForecast,
+    recipeAllowed,
     recommendationScore,
   };
 })();
@@ -185,10 +293,18 @@ window.WellnessFiles = (() => {
     return new Blob([String(data)], { type });
   }
 
-  async function shareOrDownload(filename, data, type = "application/octet-stream") {
+  async function shareOrDownload(
+    filename,
+    data,
+    type = "application/octet-stream",
+  ) {
     // Real Capacitor app: persist a temporary native file then open the iOS/Android share sheet.
     if (window.WellnessNative?.isNative?.()) {
-      const nativeResult = await window.WellnessNative.writeAndShare(filename, data, type);
+      const nativeResult = await window.WellnessNative.writeAndShare(
+        filename,
+        data,
+        type,
+      );
       if (nativeResult?.ok || nativeResult?.cancelled) return nativeResult;
       // If the native bridge fails unexpectedly, keep the browser fallbacks below.
     }
@@ -294,4 +410,3 @@ window.WellnessFiles = (() => {
 
   return { shareOrDownload, buildTextPdf };
 })();
-

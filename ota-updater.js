@@ -9,11 +9,24 @@
     "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/latest.json",
   ];
 
+  const ALLOWED_BUNDLE_URLS = new Set([
+    "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",
+    "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/main/ota/wellness-web.zip",
+  ]);
+
+  function isAllowedBundleUrl(value) {
+    try {
+      return ALLOWED_BUNDLE_URLS.has(new URL(String(value)).href);
+    } catch {
+      return false;
+    }
+  }
+
   const PENDING_VERSION_KEY = "wellnessOtaPendingVersion";
   const ACTIVE_VERSION_KEY = "wellnessOtaActiveVersion";
   const LAST_CHECK_KEY = "wellnessOtaLastCheck";
   const CHECK_INTERVAL_MS = 15 * 60 * 1000;
-  const BUNDLED_APP_VERSION = "5.4.1";
+  const BUNDLED_APP_VERSION = "5.5.0";
   const SUPPORTED_SCHEMA_VERSION = 4;
 
   function semverCore(value) {
@@ -37,12 +50,16 @@
     }
 
     const remoteApp = String(manifest?.appVersion || manifest?.version || "");
-    const currentCore = currentVersion && currentVersion !== "builtin"
-      ? currentVersion
-      : BUNDLED_APP_VERSION;
+    const currentCore =
+      currentVersion && currentVersion !== "builtin"
+        ? currentVersion
+        : BUNDLED_APP_VERSION;
 
     if (compareSemver(remoteApp, currentCore) < 0) {
-      return { ok: false, reason: `downgrade refusé (${remoteApp} < ${currentCore})` };
+      return {
+        ok: false,
+        reason: `downgrade refusé (${remoteApp} < ${currentCore})`,
+      };
     }
 
     return { ok: true, reason: "" };
@@ -88,7 +105,7 @@
         font: "600 13px/1.45 Inter, system-ui, sans-serif",
         textAlign: "center",
         backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)"
+        WebkitBackdropFilter: "blur(14px)",
       });
 
       document.body.appendChild(toast);
@@ -126,6 +143,14 @@
     const manifest = await response.json();
     if (!manifest?.version || !manifest?.url) {
       throw new Error("Manifest OTA invalide");
+    }
+
+    if (!isAllowedBundleUrl(manifest.url)) {
+      throw new Error("URL du bundle OTA non autorisée");
+    }
+
+    if (!/^[a-f0-9]{64}$/i.test(String(manifest.sha256 || ""))) {
+      throw new Error("SHA-256 OTA absent ou invalide");
     }
     return manifest;
   }
@@ -170,20 +195,24 @@
       }
       const pendingVersion = localStorage.getItem(PENDING_VERSION_KEY);
 
-      if (manifest.version === currentVersion || manifest.version === pendingVersion) {
+      if (
+        manifest.version === currentVersion ||
+        manifest.version === pendingVersion
+      ) {
         return;
       }
 
       const bundle = await updater.download({
         version: String(manifest.version),
-        url: manifest.url
+        url: manifest.url,
+        checksum: String(manifest.sha256),
       });
 
       await updater.next({ id: bundle.id });
       localStorage.setItem(PENDING_VERSION_KEY, String(manifest.version));
 
       showUpdateToast(
-        "✨ Mise à jour téléchargée. Wellness l’installera automatiquement à la prochaine fermeture/réouverture."
+        "✨ Mise à jour téléchargée. Wellness l’installera automatiquement à la prochaine fermeture/réouverture.",
       );
     } catch (error) {
       console.warn("[Wellness OTA] Mise à jour non appliquée :", error);
@@ -199,7 +228,7 @@
 
     if (!updater) {
       console.warn(
-        "[Wellness OTA] Plugin CapacitorUpdater absent. Une reconstruction native est nécessaire."
+        "[Wellness OTA] Plugin CapacitorUpdater absent. Une reconstruction native est nécessaire.",
       );
       return;
     }
@@ -234,7 +263,8 @@
       runtime.src = "hardening.js";
       document.body.appendChild(runtime);
     };
-    core.onerror = () => console.error("[Wellness 4.1] Impossible de charger hardening-core.js");
+    core.onerror = () =>
+      console.error("[Wellness 4.1] Impossible de charger hardening-core.js");
     document.body.appendChild(core);
   }
 

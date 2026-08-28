@@ -97,7 +97,7 @@ jobs:
       - name: Create OTA package
         shell: bash
         run: |
-          VERSION="5.4.1-${GITHUB_SHA::12}"
+          VERSION="5.5.0-${GITHUB_SHA::12}"
           rm -rf /tmp/wellness-ota
           mkdir -p /tmp/wellness-ota
           (
@@ -105,12 +105,15 @@ jobs:
             zip -qr /tmp/wellness-ota/wellness-web.zip .
           )
 
+          SHA256="$(sha256sum /tmp/wellness-ota/wellness-web.zip | awk '{print $1}')"
+
           cat > /tmp/wellness-ota/latest.json <<EOF
           {
             "version": "${VERSION}",
-            "appVersion": "5.4.1",
+            "appVersion": "5.5.0",
             "schemaVersion": 4,
             "sourceCommit": "${GITHUB_SHA}",
+            "sha256": "${SHA256}",
             "url": "https://raw.githubusercontent.com/gregorylaporte1810-gif/mon-app-alimentation/ota/wellness-web.zip",
             "message": "Mise à jour automatique Wellness",
             "publishedAt": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
