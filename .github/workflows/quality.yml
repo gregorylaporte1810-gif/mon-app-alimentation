@@ -1,0 +1,48 @@
+name: Quality Gate
+
+on:
+  push:
+    branches:
+      - main
+      - "fix/**"
+      - "feat/**"
+      - "chore/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Tests, build and security audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.11.0"
+          cache: npm
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Verify source and build
+        run: npm run verify
+
+      - name: Audit production and development dependencies
+        run: npm audit --audit-level=high
+
+      - name: Check Capacitor configuration
+        run: npm run cap:doctor

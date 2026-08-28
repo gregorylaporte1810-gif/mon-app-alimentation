@@ -3,29 +3,131 @@
 window.WellnessCloud = (() => {
   const CONFIG_KEY = "wellnessSupabaseConfig";
   const SESSION_KEY = "wellnessSupabaseSession";
+  const SUPABASE_HOST_SUFFIX = ".supabase.co";
+  const FORBIDDEN_SUPABASE_ROLES = new Set(["service_role", "supabase_admin"]);
 
-  function cleanUrl(url) {
-    return String(url || "")
-      .trim()
-      .replace(/\/+$/, "");
+  function emptyConfig() {
+    return { url: "", anonKey: "" };
   }
-  function getConfig() {
+
+  function decodeBase64Url(value) {
+    const normalized = String(value || "")
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const padded = normalized.padEnd(
+      normalized.length + ((4 - (normalized.length % 4)) % 4),
+      "=",
+    );
+
     try {
-      return (
-        JSON.parse(localStorage.getItem(CONFIG_KEY)) || { url: "", anonKey: "" }
-      );
+      if (typeof atob === "function") {
+        return atob(padded);
+      }
+    } catch {}
+
+    return "";
+  }
+
+  function getJwtRole(key) {
+    const parts = String(key || "").split(".");
+    if (parts.length !== 3) return "";
+
+    try {
+      const payload = JSON.parse(decodeBase64Url(parts[1]) || "{}");
+      return String(payload?.role || "").trim().toLowerCase();
     } catch {
-      return { url: "", anonKey: "" };
+      return "";
     }
   }
-  function setConfig(config) {
-    const value = {
-      url: cleanUrl(config.url),
-      anonKey: String(config.anonKey || "").trim(),
+
+  function isForbiddenSupabaseKey(key) {
+    const value = String(key || "").trim();
+    if (!value) return false;
+
+    if (/^sb_secret_/i.test(value)) return true;
+
+    const role = getJwtRole(value);
+    return FORBIDDEN_SUPABASE_ROLES.has(role);
+  }
+
+  function normalizeSupabaseUrl(url) {
+    const value = String(url || "").trim();
+    if (!value) {
+      throw new Error("Configure d'abord l'URL Supabase.");
+    }
+
+    let parsed;
+    try {
+      parsed = new URL(value);
+    } catch {
+      throw new Error("L'URL Supabase est invalide.");
+    }
+
+    if (parsed.protocol !== "https:") {
+      throw new Error("L'URL Supabase doit utiliser HTTPS.");
+    }
+
+    const hostname = parsed.hostname.toLowerCase();
+    if (!hostname.endsWith(SUPABASE_HOST_SUFFIX)) {
+      throw new Error(
+        "L'URL Supabase doit utiliser un domaine officiel *.supabase.co.",
+      );
+    }
+
+    if (parsed.username || parsed.password) {
+      throw new Error("L'URL Supabase ne doit pas contenir d'identifiants.");
+    }
+
+    return parsed.origin;
+  }
+
+  function validateAnonKey(key) {
+    const value = String(key || "").trim();
+    if (!value) {
+      throw new Error("Configure d'abord la clé anon/publishable Supabase.");
+    }
+
+    if (isForbiddenSupabaseKey(value)) {
+      throw new Error(
+        "Clé Supabase refusée : utilise uniquement une clé anon/publishable, jamais une clé service-role/secret.",
+      );
+    }
+
+    return value;
+  }
+
+  function normalizeConfig(config = {}) {
+    return {
+      url: normalizeSupabaseUrl(config.url),
+      anonKey: validateAnonKey(config.anonKey),
     };
+  }
+
+  function getConfig() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(CONFIG_KEY)) || emptyConfig();
+      const value = {
+        url: String(parsed?.url || "").trim(),
+        anonKey: String(parsed?.anonKey || "").trim(),
+      };
+
+      if (isForbiddenSupabaseKey(value.anonKey)) {
+        localStorage.removeItem(CONFIG_KEY);
+        return emptyConfig();
+      }
+
+      return value;
+    } catch {
+      return emptyConfig();
+    }
+  }
+
+  function setConfig(config) {
+    const value = normalizeConfig(config);
     localStorage.setItem(CONFIG_KEY, JSON.stringify(value));
     return value;
   }
+
   let sessionCache = null;
   let memoryOnlySession = false;
 
@@ -111,16 +213,26 @@ window.WellnessCloud = (() => {
     clearStoredSessions();
     return sessionCache;
   }
+
   function requireConfig() {
     const config = getConfig();
-    if (!config.url || !config.anonKey)
-      throw new Error("Configure d'abord l'URL Supabase et la clé anon.");
-    return config;
+
+    if (!config.url || !config.anonKey) {
+      throw new Error(
+        "Configure d'abord l'URL Supabase et la clé anon/publishable.",
+      );
+    }
+
+    return normalizeConfig(config);
   }
+
   async function request(path, options = {}, token = null) {
     const config = requireConfig();
     const response = await fetch(config.url + path, {
       ...options,
+      cache: "no-store",
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
       headers: {
         apikey: config.anonKey,
         "Content-Type": "application/json",
@@ -146,6 +258,7 @@ window.WellnessCloud = (() => {
     }
     return data;
   }
+
   async function signUp(email, password) {
     const data = await request("/auth/v1/signup", {
       method: "POST",
@@ -154,6 +267,7 @@ window.WellnessCloud = (() => {
     if (data?.access_token) setSession(data);
     return data;
   }
+
   async function signIn(email, password) {
     const data = await request("/auth/v1/token?grant_type=password", {
       method: "POST",
@@ -162,6 +276,7 @@ window.WellnessCloud = (() => {
     setSession(data);
     return data;
   }
+
   async function signOut() {
     const session = getSession();
     let revokeError = null;
@@ -190,6 +305,7 @@ window.WellnessCloud = (() => {
 
     return true;
   }
+
   async function refreshSession() {
     const session = getSession();
     if (!session?.refresh_token) return null;
@@ -200,6 +316,7 @@ window.WellnessCloud = (() => {
     setSession(data);
     return data;
   }
+
   async function validSession() {
     let session = getSession();
     if (!session) return null;
@@ -214,6 +331,7 @@ window.WellnessCloud = (() => {
     }
     return session;
   }
+
   async function push(payload) {
     const session = await validSession();
     if (!session?.access_token || !session?.user?.id)
@@ -234,6 +352,7 @@ window.WellnessCloud = (() => {
     );
     return row.updated_at;
   }
+
   async function pull() {
     const session = await validSession();
     if (!session?.access_token || !session?.user?.id)
