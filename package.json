@@ -36,8 +36,8 @@
     "@capacitor/local-notifications": "^8.0.0",
     "@capacitor/share": "^8.0.0",
     "@capawesome/capacitor-file-picker": "^8.0.0",
-    "@capgo/capacitor-updater": "^8.51.3",
-    "@capgo/capacitor-health": "8.10.4"
+    "@capgo/capacitor-health": "8.10.4",
+    "@capgo/capacitor-updater": "^8.51.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
@@ -46,5 +46,8 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
   }
 }
