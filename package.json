@@ -50,7 +50,7 @@
     "@capacitor/ios": "^8.5.0",
     "@playwright/test": "1.62.1",
     "exceljs": "^4.4.0",
-    "html-validate": "11.10.0"
+    "html-validate": "11.13.0"
   },
   "engines": {
     "node": ">=22.16.0"
